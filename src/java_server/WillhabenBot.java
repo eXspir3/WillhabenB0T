@@ -59,7 +59,7 @@ public class WillhabenBot {
 	 * @param link
 	 * @return The Number of Listings extractet from Site Sourcecode.
 	 */
-	public static int extractNumberOfListings(String link) {
+	private int extractNumberOfListings(String link) {
 		try {
 			if (link == null)
 				throw new Exception("Link Null");
@@ -140,14 +140,10 @@ public class WillhabenBot {
 	public int getNoListings() {
 		return noListings;
 	}
-
-//	public void setNoListings(int noListings) {
-//		this.noListings = noListings;
+//For Testing - change extractNumberOfListings to public static
+//	public static void main(String[] args) {
+//		extractNumberOfListings(
+//				"https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=Xiaomi+M365&attribute_tree_level_0=&attribute_tree_level_1=&typedKeyword=Xiaomi+M365");
 //	}
-
-	public static void main(String[] args) {
-		extractNumberOfListings(
-				"https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=Xiaomi+M365&attribute_tree_level_0=&attribute_tree_level_1=&typedKeyword=Xiaomi+M365");
-	}
 
 }
