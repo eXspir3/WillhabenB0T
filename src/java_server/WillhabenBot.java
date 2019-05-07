@@ -1,30 +1,45 @@
 package java_server;
 
-import org.jsoup.*;
+import org.jsoup.*;	
 import org.jsoup.select.Elements;
+
+import java.util.ArrayList;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class WillhabenBot {
 
 	private String link = "";
 	private String[] keywords = null;
-	private String email = "";
+	private String name = null;
+	private ArrayList<String> emails = null;
 	private int interval = -1;
 	private int noListings = 0;
 
-	public WillhabenBot(String email, int interval, String[] keywords) {
+	public WillhabenBot(String name,  String[] keywords, int interval,  ArrayList<String> emails) {
+		this.name = name;
 		this.link = "https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=";
 		this.keywords = keywords;
-		this.email = email;
+		this.emails = emails;
 		this.interval = interval;
+		this.noListings = this.updateNumberOfListings();
 	}
 
-	public WillhabenBot(String email, int interval, String link) {
+	public WillhabenBot(String name, String link, int interval,  ArrayList<String> emails) {
+		this.name = name;
 		this.link = link;
 		this.keywords = null;
-		this.email = email;
+		this.emails = emails;
 		this.interval = interval;
+		this.noListings = this.updateNumberOfListings();
 	}
 
 	/**
@@ -94,7 +109,7 @@ public class WillhabenBot {
 	 * 
 	 * @return True if there are new Listings available, False if otherwise
 	 */
-	public boolean isNew() {
+	private boolean isNew() {
 		int newNumberOfListings = updateNumberOfListings();
 		if (this.noListings < newNumberOfListings) {
 			this.noListings = newNumberOfListings;
@@ -104,7 +119,64 @@ public class WillhabenBot {
 		}
 		return false;
 	}
+	
+	private void sendMail() throws Exception {
+		String mailRecepient = "";
+		//mailSender / Username / Password / SMTP CONFIG will be retrieved from Property 
+		//File when implemented - currently hardcoded for testing
+		String mailSender = "sender@mail.com";
+		final String username = "username";
+		final String password = "password";
+		String host = "placeholder.testsmtp.net";
+		for(String element:this.emails) {
+			mailRecepient = mailRecepient + "," + element;
+		}
+		
+	      // Get the Session object.
+	      Session session = Session.getInstance(props,
+	         new javax.mail.Authenticator() {
+	            protected PasswordAuthentication getPasswordAuthentication() {
+	               return new PasswordAuthentication(username, password);
+	            }
+		});
 
+	      try {
+	            // Create a default MimeMessage object.
+	            Message message = new MimeMessage(session);
+
+	   	   // Set From: header field of the header.
+		   message.setFrom(new InternetAddress(from));
+
+		   // Set To: header field of the header.
+		   message.setRecipients(Message.RecipientType.TO,
+	              InternetAddress.parse(to));
+
+		   // Set Subject: header field
+		   message.setSubject("Testing Subject");
+
+		   // Send the actual HTML message, as big as you like
+		   message.setContent(
+	              "<h1>This is actual message embedded in HTML tags</h1>",
+	             "text/html");
+
+		   // Send message
+		   Transport.send(message);
+
+		   System.out.println("Sent message successfully....");
+
+	      } catch (MessagingException e) {
+		   e.printStackTrace();
+		   throw new RuntimeException(e);
+	      }
+		
+		
+
+		
+		
+		
+		
+	}
+	
 	public String getLink() {
 		return link;
 	}
@@ -121,12 +193,16 @@ public class WillhabenBot {
 		this.keywords = keywords;
 	}
 
-	public String getEmail() {
-		return email;
+	public ArrayList<String> getEmails() {
+		return emails;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public String getEmail(int index) throws Exception {
+		return emails.get(index);
+	}
+
+	public void setEmails(ArrayList<String> emails) {
+		this.emails = emails;
 	}
 
 	public int getInterval() {
@@ -140,6 +216,15 @@ public class WillhabenBot {
 	public int getNoListings() {
 		return noListings;
 	}
+	
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+
 //For Testing - change extractNumberOfListings to public static
 //	public static void main(String[] args) {
 //		extractNumberOfListings(
