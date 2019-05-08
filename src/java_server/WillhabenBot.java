@@ -1,6 +1,6 @@
 package java_server;
 
-import org.jsoup.*;
+import org.jsoup.*;	
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
@@ -23,22 +23,26 @@ public class WillhabenBot {
 	private ArrayList<String> emails = null;
 	private int interval = -1;
 	private int noListings = 0;
+	private Properties mailConfiguration;
 
-	public WillhabenBot(String name, String[] keywords, int interval, ArrayList<String> emails) {
+	public WillhabenBot(String name, String[] keywords, int interval, ArrayList<String> emails, Properties mailConfiguration) {
 		this.name = name;
 		this.link = "https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=";
 		this.keywords = keywords;
 		this.emails = emails;
 		this.interval = interval;
+		this.mailConfiguration = mailConfiguration;
 		this.noListings = this.updateNumberOfListings();
+		
 	}
 
-	public WillhabenBot(String name, String link, int interval, ArrayList<String> emails) {
+	public WillhabenBot(String name, String link, int interval, ArrayList<String> emails, Properties mailConfiguration) {
 		this.name = name;
 		this.link = link;
 		this.keywords = null;
 		this.emails = emails;
 		this.interval = interval;
+		this.mailConfiguration = mailConfiguration;
 		this.noListings = this.updateNumberOfListings();
 	}
 
@@ -119,59 +123,23 @@ public class WillhabenBot {
 		}
 		return false;
 	}
-
-	private void sendMail() throws Exception {
-		String mailRecepient = "";
-
-		// mailSender / Username / Password / Smtp Server Config will be retrieved
-		// from Property File when implemented - currently hardcoded for testing
-
-		String mailSender = "sender@mail.com";
-		final String username = "username";
-		final String password = "password";
-		String host = "placeholder.testsmtp.net";
-		for (String element : this.emails) {
-			mailRecepient = mailRecepient + "," + element;
-		}
-		// Create Properties Object for session (will be loaded from config file in future
-	      Properties props = new Properties();
-	      props.put("mail.smtp.auth", "true");
-	      props.put("mail.smtp.starttls.enable", "true");
-	      props.put("mail.smtp.host", host);
-	      props.put("mail.smtp.port", "25");
-	      
-		// Get the Session object.
-		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(username, password);
-			}
-		});
-
-		try {
-			// Create a default MimeMessage object.
-			Message message = new MimeMessage(session);
-
-			// Set From: header field of the header.
-			message.setFrom(new InternetAddress(mailSender));
-
-			// Set To: header field of the header.
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(mailRecepient));
-
-			// Set Subject: header field
-			message.setSubject("Testing Subject");
-
-			// Send the actual HTML message will be imported form File in Future
-			message.setContent("<h1>This is actual message embedded in HTML tags</h1>", "text/html");
-
-			// Send message
-			Transport.send(message);
-
-			System.out.println("Sent message successfully....");
-
-		} catch (MessagingException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
+	
+	/**
+	 * Creates Mail Object, Configures and Sends Email 
+	 * @throws Exception
+	 */
+	public void sendMail() throws Exception {
+		SendMail mail = new SendMail();
+		mail.setConfiguration(this.mailConfiguration);
+		mail.sendMail();
+	}
+	
+	public void setMailConfig(Properties mailConfiguration) {
+		this.mailConfiguration = mailConfiguration;
+	}
+	
+	public Properties getMailConfig() {
+		return this.mailConfiguration;
 	}
 
 	public String getLink() {
@@ -227,5 +195,4 @@ public class WillhabenBot {
 //		extractNumberOfListings(
 //				"https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=Xiaomi+M365&attribute_tree_level_0=&attribute_tree_level_1=&typedKeyword=Xiaomi+M365");
 //	}
-
 }
