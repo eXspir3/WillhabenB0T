@@ -11,7 +11,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
- class SendMail {
+class SendMail {
 	boolean startTLS = false;
 	int mailPort = 25;
 	String mailHost = "";
@@ -37,7 +37,7 @@ import javax.mail.internet.MimeMessage;
 //			}
 //		}
 //	}
-	
+
 	SendMail() {
 		this.startTLS = startTLS;
 		this.mailPort = mailPort;
@@ -49,9 +49,9 @@ import javax.mail.internet.MimeMessage;
 	}
 
 	void setConfiguration(Properties mailConfiguration) {
-		//NOT IMPLEMENTED
+		// NOT IMPLEMENTED
 	}
-	
+
 	void sendMail() throws Exception {
 
 		Properties mailAuthProps = new Properties();

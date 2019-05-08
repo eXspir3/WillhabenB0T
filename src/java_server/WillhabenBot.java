@@ -1,69 +1,36 @@
 package java_server;
 
-import org.jsoup.*;	
+import org.jsoup.*;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 public class WillhabenBot {
 
-	private String link = "";
-	private String[] keywords = null;
+	private String link = null;
 	private String name = null;
-	private ArrayList<String> emails = null;
 	private int interval = -1;
 	private int noListings = 0;
 	private Properties mailConfiguration;
+	private Properties botConfig;
 
-	public WillhabenBot(String name, String[] keywords, int interval, ArrayList<String> emails, Properties mailConfiguration) {
-		this.name = name;
-		this.link = "https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=";
-		this.keywords = keywords;
-		this.emails = emails;
-		this.interval = interval;
-		this.mailConfiguration = mailConfiguration;
-		this.noListings = this.updateNumberOfListings();
-		
-	}
-
-	public WillhabenBot(String name, String link, int interval, ArrayList<String> emails, Properties mailConfiguration) {
-		this.name = name;
-		this.link = link;
-		this.keywords = null;
-		this.emails = emails;
-		this.interval = interval;
+	public WillhabenBot(Properties botConfig, Properties mailConfiguration) {
+		this.botConfig = botConfig;
+		this.setBotConfig(botConfig);
 		this.mailConfiguration = mailConfiguration;
 		this.noListings = this.updateNumberOfListings();
 	}
 
 	/**
-	 * Prepares Link for the Extraction of Number of Listings by adding the Keywords
-	 * to the Link or only using the supplied Link. Then Calls
-	 * extractNumberOfListings() with the prepared Link.
+	 * Checks if Link is not Null
 	 * 
 	 * @return The Number of Listings extracted by extractNumberOfListings()
 	 */
 	private String prepareLink() {
-		if (this.keywords[0] != null) {
-			for (int i = 0; i < keywords.length; i++) {
-				if (i == keywords.length - 1) {
-					this.link = this.link + keywords[i];
-				} else {
-					this.link = this.link + keywords[i] + "+";
-				}
-			}
-			return this.link;
-		} else if (this.link != "") {
+		if (this.link != "" && this.link != null) {
 			return this.link;
 		} else {
 			System.out.println("No Link / Keywords provided");
@@ -82,10 +49,8 @@ public class WillhabenBot {
 		try {
 			if (link == null)
 				throw new Exception("Link Null");
-			// Downloads Website Source and strips Html to only script Tags
 			org.jsoup.nodes.Document website = Jsoup.connect(link).get();
 			Elements strippedHtml = website.select("script");
-			// Matches Regex Pattern to extract Number of Listings
 			Pattern noListingsPattern = Pattern.compile("(search_results_number\":\")(.{1,4}\\d)");
 			Matcher mat = noListingsPattern.matcher(strippedHtml.toString());
 			mat.find();
@@ -109,90 +74,61 @@ public class WillhabenBot {
 
 	/**
 	 * Checks if there are new Listings available and sets this.noListings according
-	 * to the changes.
+	 * to the changes and calls sendMail. Calls startTimer if no new Listings where found.
 	 * 
 	 * @return True if there are new Listings available, False if otherwise
-	 */
-	private boolean isNew() {
-		int newNumberOfListings = updateNumberOfListings();
-		if (this.noListings < newNumberOfListings) {
-			this.noListings = newNumberOfListings;
-			return true;
-		} else if (this.noListings > newNumberOfListings) {
-			this.noListings = newNumberOfListings;
-		}
-		return false;
-	}
-	
-	/**
-	 * Creates Mail Object, Configures and Sends Email 
 	 * @throws Exception
 	 */
-	public void sendMail() throws Exception {
+	private void isNew() throws Exception {
+		int newNumberOfListings = updateNumberOfListings();
+		if (this.noListings < newNumberOfListings && newNumberOfListings > -1) {
+			this.noListings = newNumberOfListings;
+			this.sendMail();
+		} else if (this.noListings >= newNumberOfListings && newNumberOfListings > -1) {
+			this.noListings = newNumberOfListings;
+			this.startTimer(interval);
+		} else {
+			throw new Exception("newNumberOfListings was " + newNumberOfListings);
+		}
+	}
+
+	/**
+	 * Creates Mail Object, Configures and Sends Email and then calls startTimer to
+	 * wait
+	 * 
+	 * @throws Exception
+	 */
+	private void sendMail() throws Exception {
 		SendMail mail = new SendMail();
 		mail.setConfiguration(this.mailConfiguration);
 		mail.sendMail();
+		this.startTimer(this.interval);
+	}
+
+	private void startTimer(int interval) throws Exception {
+		    Thread.sleep(interval);
+		    this.isNew();
 	}
 	
+	public void run() throws Exception {
+		this.isNew();
+	}
+
+	public void setBotConfig(Properties botConfig) {
+		this.name = botConfig.getProperty("name");
+		this.link = botConfig.getProperty("link");
+		this.interval = Integer.parseInt(botConfig.getProperty("intervall"));
+	}
+
+	public Properties getBotConfig() {
+		return this.botConfig;
+	}
+
 	public void setMailConfig(Properties mailConfiguration) {
 		this.mailConfiguration = mailConfiguration;
 	}
-	
+
 	public Properties getMailConfig() {
 		return this.mailConfiguration;
 	}
-
-	public String getLink() {
-		return link;
-	}
-
-	public void setLink(String link) {
-		this.link = link;
-	}
-
-	public String[] getKeywords() {
-		return keywords;
-	}
-
-	public void setKeywords(String[] keywords) {
-		this.keywords = keywords;
-	}
-
-	public ArrayList<String> getEmails() {
-		return emails;
-	}
-
-	public String getEmail(int index) throws Exception {
-		return emails.get(index);
-	}
-
-	public void setEmails(ArrayList<String> emails) {
-		this.emails = emails;
-	}
-
-	public int getInterval() {
-		return interval;
-	}
-
-	public void setInterval(int interval) {
-		this.interval = interval;
-	}
-
-	public int getNoListings() {
-		return noListings;
-	}
-
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-//For Testing - change extractNumberOfListings to public static
-//	public static void main(String[] args) {
-//		extractNumberOfListings(
-//				"https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=Xiaomi+M365&attribute_tree_level_0=&attribute_tree_level_1=&typedKeyword=Xiaomi+M365");
-//	}
 }
