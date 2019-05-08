@@ -3,12 +3,11 @@ package java_server;
 import org.jsoup.*;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WillhabenBot {
+public class WillhabenBot implements Runnable{
 
 	private String link = null;
 	private String name = null;
@@ -80,12 +79,17 @@ public class WillhabenBot {
 	 * @throws Exception
 	 */
 	private void isNew() throws Exception {
+		System.out.println("isNew Called.");
+		System.out.println(this.noListings);
 		int newNumberOfListings = updateNumberOfListings();
 		if (this.noListings < newNumberOfListings && newNumberOfListings > -1) {
 			this.noListings = newNumberOfListings;
-			this.sendMail();
+			//this.sendMail();
+			System.out.println(this.noListings);
+			System.out.println("Mail would have been sent");
 		} else if (this.noListings >= newNumberOfListings && newNumberOfListings > -1) {
 			this.noListings = newNumberOfListings;
+			System.out.println("Mail not sent");
 			this.startTimer(interval);
 		} else {
 			throw new Exception("newNumberOfListings was " + newNumberOfListings);
@@ -104,20 +108,31 @@ public class WillhabenBot {
 		mail.sendMail();
 		this.startTimer(this.interval);
 	}
-
+	/**
+	 * Puts Thread to sleep for given amount of Time
+	 * @param interval
+	 * @throws Exception
+	 */
 	private void startTimer(int interval) throws Exception {
-		    Thread.sleep(interval);
+		System.out.println("Timer Started");
+		    Thread.sleep(interval * 1000);
 		    this.isNew();
 	}
-	
-	public void run() throws Exception {
-		this.isNew();
+	/**
+	 * Method first called when new Thread is started
+	 */
+	public void run() {
+		try {
+			this.isNew();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void setBotConfig(Properties botConfig) {
 		this.name = botConfig.getProperty("name");
 		this.link = botConfig.getProperty("link");
-		this.interval = Integer.parseInt(botConfig.getProperty("intervall"));
+		this.interval = Integer.parseInt(botConfig.getProperty("interval"));
 	}
 
 	public Properties getBotConfig() {
