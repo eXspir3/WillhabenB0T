@@ -1,6 +1,6 @@
 package java_server;
 
-import org.jsoup.*;	
+import org.jsoup.*;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class WillhabenBot {
 	private int interval = -1;
 	private int noListings = 0;
 
-	public WillhabenBot(String name,  String[] keywords, int interval,  ArrayList<String> emails) {
+	public WillhabenBot(String name, String[] keywords, int interval, ArrayList<String> emails) {
 		this.name = name;
 		this.link = "https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=";
 		this.keywords = keywords;
@@ -33,7 +33,7 @@ public class WillhabenBot {
 		this.noListings = this.updateNumberOfListings();
 	}
 
-	public WillhabenBot(String name, String link, int interval,  ArrayList<String> emails) {
+	public WillhabenBot(String name, String link, int interval, ArrayList<String> emails) {
 		this.name = name;
 		this.link = link;
 		this.keywords = null;
@@ -119,64 +119,61 @@ public class WillhabenBot {
 		}
 		return false;
 	}
-	
+
 	private void sendMail() throws Exception {
 		String mailRecepient = "";
-		//mailSender / Username / Password / SMTP CONFIG will be retrieved from Property 
-		//File when implemented - currently hardcoded for testing
+
+		// mailSender / Username / Password / Smtp Server Config will be retrieved
+		// from Property File when implemented - currently hardcoded for testing
+
 		String mailSender = "sender@mail.com";
 		final String username = "username";
 		final String password = "password";
 		String host = "placeholder.testsmtp.net";
-		for(String element:this.emails) {
+		for (String element : this.emails) {
 			mailRecepient = mailRecepient + "," + element;
 		}
-		
-	      // Get the Session object.
-	      Session session = Session.getInstance(props,
-	         new javax.mail.Authenticator() {
-	            protected PasswordAuthentication getPasswordAuthentication() {
-	               return new PasswordAuthentication(username, password);
-	            }
+		// Create Properties Object for session (will be loaded from config file in future
+	      Properties props = new Properties();
+	      props.put("mail.smtp.auth", "true");
+	      props.put("mail.smtp.starttls.enable", "true");
+	      props.put("mail.smtp.host", host);
+	      props.put("mail.smtp.port", "25");
+	      
+		// Get the Session object.
+		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(username, password);
+			}
 		});
 
-	      try {
-	            // Create a default MimeMessage object.
-	            Message message = new MimeMessage(session);
+		try {
+			// Create a default MimeMessage object.
+			Message message = new MimeMessage(session);
 
-	   	   // Set From: header field of the header.
-		   message.setFrom(new InternetAddress(from));
+			// Set From: header field of the header.
+			message.setFrom(new InternetAddress(mailSender));
 
-		   // Set To: header field of the header.
-		   message.setRecipients(Message.RecipientType.TO,
-	              InternetAddress.parse(to));
+			// Set To: header field of the header.
+			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(mailRecepient));
 
-		   // Set Subject: header field
-		   message.setSubject("Testing Subject");
+			// Set Subject: header field
+			message.setSubject("Testing Subject");
 
-		   // Send the actual HTML message, as big as you like
-		   message.setContent(
-	              "<h1>This is actual message embedded in HTML tags</h1>",
-	             "text/html");
+			// Send the actual HTML message will be imported form File in Future
+			message.setContent("<h1>This is actual message embedded in HTML tags</h1>", "text/html");
 
-		   // Send message
-		   Transport.send(message);
+			// Send message
+			Transport.send(message);
 
-		   System.out.println("Sent message successfully....");
+			System.out.println("Sent message successfully....");
 
-	      } catch (MessagingException e) {
-		   e.printStackTrace();
-		   throw new RuntimeException(e);
-	      }
-		
-		
-
-		
-		
-		
-		
+		} catch (MessagingException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
 	}
-	
+
 	public String getLink() {
 		return link;
 	}
@@ -216,11 +213,11 @@ public class WillhabenBot {
 	public int getNoListings() {
 		return noListings;
 	}
-	
+
 	public String getName() {
 		return this.name;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
