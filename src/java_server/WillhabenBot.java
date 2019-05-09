@@ -11,6 +11,7 @@ public class WillhabenBot implements Runnable{
 
 	private String link = null;
 	private String name = null;
+	private String botId = null;
 	private int interval = -1;
 	private int noListings = 0;
 	private Properties mailConfiguration;
@@ -53,7 +54,6 @@ public class WillhabenBot implements Runnable{
 			Pattern noListingsPattern = Pattern.compile("(search_results_number\":\")(.{1,4}\\d)");
 			Matcher mat = noListingsPattern.matcher(strippedHtml.toString());
 			mat.find();
-
 			return Integer.parseInt(mat.group(2));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -90,7 +90,6 @@ public class WillhabenBot implements Runnable{
 		} else if (this.noListings >= newNumberOfListings && newNumberOfListings > -1) {
 			this.noListings = newNumberOfListings;
 			System.out.println("Mail not sent");
-			this.startTimer(interval);
 		} else {
 			throw new Exception("newNumberOfListings was " + newNumberOfListings);
 		}
@@ -106,7 +105,6 @@ public class WillhabenBot implements Runnable{
 		SendMail mail = new SendMail();
 		mail.setConfiguration(this.mailConfiguration);
 		mail.sendMail();
-		this.startTimer(this.interval);
 	}
 	/**
 	 * Puts Thread to sleep for given amount of Time
@@ -114,29 +112,37 @@ public class WillhabenBot implements Runnable{
 	 * @throws Exception
 	 */
 	private void startTimer(int interval) throws Exception {
-		System.out.println("Timer Started");
+		System.out.println("Timer Started: " + interval + " seconds");
 		    Thread.sleep(interval * 1000);
-		    this.isNew();
 	}
 	/**
 	 * Method first called when new Thread is started
 	 */
 	public void run() {
 		try {
-			this.isNew();
+			while(!Thread.currentThread().isInterrupted()){
+				this.isNew();
+				this.startTimer(this.interval);
+				}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void setBotConfig(Properties botConfig) {
+		this.botId = botConfig.getProperty("botId");
 		this.name = botConfig.getProperty("name");
 		this.link = botConfig.getProperty("link");
 		this.interval = Integer.parseInt(botConfig.getProperty("interval"));
 	}
 
 	public Properties getBotConfig() {
-		return this.botConfig;
+		Properties getBotConfig = new Properties();
+		getBotConfig.put("link", this.link);
+		getBotConfig.put("name", this.name);
+		getBotConfig.put("botId", this.botId);
+		getBotConfig.put("interval", this.interval);
+		return getBotConfig;
 	}
 
 	public void setMailConfig(Properties mailConfiguration) {
