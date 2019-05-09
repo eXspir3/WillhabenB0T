@@ -17,13 +17,26 @@ public class testBotMain {
 		BotHandler botHandler = new BotHandler();
 		botHandler.createBot(botConfig, mailConfig);
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(8000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		botHandler.stopBot("111");
-			
+		try {
+			Thread.sleep(4000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		botHandler.startBot("111");
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		botHandler.stopBot("111");
 		}
 	}
 

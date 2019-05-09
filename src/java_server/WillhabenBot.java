@@ -73,14 +73,13 @@ public class WillhabenBot implements Runnable{
 
 	/**
 	 * Checks if there are new Listings available and sets this.noListings according
-	 * to the changes and calls sendMail. Calls startTimer if no new Listings where found.
+	 * to the changes and calls sendMail if there is a new Listing.
 	 * 
-	 * @return True if there are new Listings available, False if otherwise
 	 * @throws Exception
 	 */
 	private void isNew() throws Exception {
-		System.out.println("isNew Called.");
-		System.out.println(this.noListings);
+		System.out.println("isNew Called");
+		System.out.println("Current Number of Listings: " + this.noListings);
 		int newNumberOfListings = updateNumberOfListings();
 		if (this.noListings < newNumberOfListings && newNumberOfListings > -1) {
 			this.noListings = newNumberOfListings;
@@ -125,7 +124,8 @@ public class WillhabenBot implements Runnable{
 				this.startTimer(this.interval);
 				}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Thread Exit");
+			//e.printStackTrace();
 		}
 	}
 
