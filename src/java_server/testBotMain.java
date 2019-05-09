@@ -1,7 +1,5 @@
 package java_server;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 public class testBotMain {

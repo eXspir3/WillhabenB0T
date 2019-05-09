@@ -30,6 +30,14 @@ public class BotHandler {
 		newBotThread.start();
 		System.out.println("BotHanlder Created Bot with ThreadId " + this.threadId);
 	}
+	
+	/**
+	 * Deletes a Bot by deleting the Reference from outer HashMap
+	 * @param botId
+	 */
+	public void deleteBot(String botId) {
+		outerMap.remove(botId);
+	}
 
 	/**
 	 * Stops a running Bot by matching the BotId to the corresponding threadId and
