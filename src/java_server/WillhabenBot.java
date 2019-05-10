@@ -47,7 +47,7 @@ public class WillhabenBot implements Runnable{
 	 */
 	private int extractNumberOfListings(String link) {
 		try {
-			if (link == null)
+			if (link == null || link == "")
 				throw new Exception("Link Null");
 			org.jsoup.nodes.Document website = Jsoup.connect(link).get();
 			Elements strippedHtml = website.select("script");
@@ -78,6 +78,7 @@ public class WillhabenBot implements Runnable{
 	 * @throws Exception
 	 */
 	private void isNew() throws Exception {
+		
 		System.out.println("isNew Called");
 		System.out.println("Current Number of Listings: " + this.noListings);
 		int newNumberOfListings = updateNumberOfListings();

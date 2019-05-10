@@ -1,5 +1,6 @@
 package java_server;
 
+import java.io.IOException;
 import java.util.Properties;
 
 public class testBotMain {
@@ -12,30 +13,28 @@ public class testBotMain {
 		botConfig.put("name", "TestName");
 		botConfig.put("interval", "5");
 		botConfig.put("botId", "111");
-		BotHandler botHandler = new BotHandler();
-		botHandler.createBot(botConfig, mailConfig);
+		BotHandler botHandler = null;
 		try {
-			Thread.sleep(8000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		botHandler.stopBot("111");
-		try {
-			Thread.sleep(4000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		botHandler.startBot("111");
-		try {
+			// Erstellen des Bothandlers und erzeugen eines neuen Bots
+			botHandler = new BotHandler();
+			botHandler.createBot(botConfig, mailConfig);
 			Thread.sleep(3000);
-		} catch (InterruptedException e) {
+			botHandler.stopBot(botConfig.getProperty("botId"));
+			System.out.println("------------------------------------");
+			//Bot wurde gestoppt sollte aber nun in File gespeichert sein -- neuer Bothandler wird erzeugt und startBot aufgerufen
+			Thread.sleep(3000);
+			botHandler = new BotHandler();
+			botHandler.startBot(botConfig.getProperty("botId"));
+			Thread.sleep(3000);
+			botHandler.deleteBot(botConfig.getProperty("botId"));
+			Thread.sleep(3000);
+			System.out.println();
+			//Bot wurde gelöscht , es wird nun versucht diesen Bot zu starten aber er existiert nicht
+			botHandler.startBot(botConfig.getProperty("botId"));
+		} catch (IOException | InterruptedException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		botHandler.stopBot("111");
+			System.out.println(e);
 		}
 	}
-
+}
 
