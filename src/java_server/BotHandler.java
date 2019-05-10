@@ -45,7 +45,7 @@ public class BotHandler {
 		}
 		this.addThreadToMap(botConfig, mailConfig, this.threadId);
 		newBotThread.start();
-		System.out.println("BotHanlder Created Bot with ThreadId " + this.threadId);
+		System.out.println("BotHandler Created Bot with ThreadId " + this.threadId);
 	}
 
 	/**
