@@ -13,12 +13,19 @@ public class testBotMain {
 		botConfig.put("name", "TestName");
 		botConfig.put("interval", "5");
 		botConfig.put("botId", "111");
+		mailConfig.put("startTLS", "true");
+		mailConfig.put("mailPort", "587");
+		mailConfig.put("mailHost", "mail.ipax.at");
+		mailConfig.put("mailSender", "BLANK");
+		mailConfig.put("mailRecepient", "BLANK");
+		mailConfig.put("user", "BLANK");
+		mailConfig.put("password", "BLANK");
 		BotHandler botHandler = null;
 		try {
-			// Erstellen des Bothandlers und erzeugen eines neuen Bots
+			//Erstellen des Bothandlers und erzeugen eines neuen Bots
 			botHandler = new BotHandler();
 			botHandler.createBot(botConfig, mailConfig);
-			Thread.sleep(3000);
+			Thread.sleep(12000);
 			botHandler.stopBot(botConfig.getProperty("botId"));
 			System.out.println("------------------------------------");
 			//Bot wurde gestoppt sollte aber nun in File gespeichert sein -- neuer Bothandler wird erzeugt und startBot aufgerufen

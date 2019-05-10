@@ -15,41 +15,30 @@ class SendMail {
 	boolean startTLS = false;
 	int mailPort = 25;
 	String mailHost = "";
-	String mailSender = "";
+	String mailSender = "willhabenbot@noaddressentered.net";
 	String mailRecepient = "";
 	String username = "";
 	String password = "";
+	String link = "No-Link-Entered";
 
-//	SendMail(boolean startTLS, int mailPort, String mailHost, String mailSender, ArrayList<String> mailRecepient, String username,
-//			String password) {
-//		this.startTLS = startTLS;
-//		this.mailPort = mailPort;
-//		this.mailHost = mailHost;
-//		this.mailSender = mailSender;
-//		this.username = username;
-//		this.password = password;
-//		this.mailRecepient = "";
-//		for (String element : mailRecepient) {
-//			if (this.mailRecepient == "") {
-//				this.mailRecepient = element;
-//			} else {
-//				this.mailRecepient = this.mailRecepient + "," + element;
-//			}
-//		}
-//	}
-
-	SendMail() {
-		this.startTLS = startTLS;
-		this.mailPort = mailPort;
-		this.mailHost = mailHost;
-		this.mailSender = mailSender;
-		this.mailRecepient = mailRecepient;
-		this.username = username;
-		this.password = password;
+	SendMail(Properties mailConfiguration, String link) throws Exception {
+		this.setConfiguration(mailConfiguration);
+		this.forgeMail(link);
+		this.sendMail();
 	}
 
 	void setConfiguration(Properties mailConfiguration) {
-		// NOT IMPLEMENTED
+		this.startTLS = Boolean.parseBoolean(mailConfiguration.getProperty("startTLS"));
+		this.mailPort = Integer.parseInt(mailConfiguration.getProperty("mailPort"));
+		this.mailHost = mailConfiguration.getProperty("mailHost");
+		this.mailSender = mailConfiguration.getProperty("mailSender");
+		this.mailRecepient = mailConfiguration.getProperty("mailRecepient");
+		username = mailConfiguration.getProperty("username");
+		password = mailConfiguration.getProperty("password");
+	}
+	
+	void forgeMail(String link) {
+		//NOT IMPLEMENTED
 	}
 
 	void sendMail() throws Exception {
@@ -63,7 +52,7 @@ class SendMail {
 		// Get the Session object.
 		Session session = Session.getInstance(mailAuthProps, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(username, password);
+				return new PasswordAuthentication("willhabenbot@ensinger.eu", "bot");
 			}
 		});
 

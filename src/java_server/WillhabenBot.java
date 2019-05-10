@@ -84,9 +84,9 @@ public class WillhabenBot implements Runnable{
 		int newNumberOfListings = updateNumberOfListings();
 		if (this.noListings < newNumberOfListings && newNumberOfListings > -1) {
 			this.noListings = newNumberOfListings;
-			//this.sendMail();
+			this.sendMail();
 			System.out.println(this.noListings);
-			System.out.println("Mail would have been sent");
+			System.out.println("Mail should have been sent");
 		} else if (this.noListings >= newNumberOfListings && newNumberOfListings > -1) {
 			this.noListings = newNumberOfListings;
 			System.out.println("Mail not sent");
@@ -102,9 +102,7 @@ public class WillhabenBot implements Runnable{
 	 * @throws Exception
 	 */
 	private void sendMail() throws Exception {
-		SendMail mail = new SendMail();
-		mail.setConfiguration(this.mailConfiguration);
-		mail.sendMail();
+		SendMail mail = new SendMail(this.mailConfiguration, this.botConfig.getProperty("link"));
 	}
 	/**
 	 * Puts Thread to sleep for given amount of Time
@@ -121,6 +119,7 @@ public class WillhabenBot implements Runnable{
 	public void run() {
 		try {
 			while(!Thread.currentThread().isInterrupted()){
+//				this.sendMail();
 				this.isNew();
 				this.startTimer(this.interval);
 				}
@@ -130,27 +129,10 @@ public class WillhabenBot implements Runnable{
 		}
 	}
 
-	public void setBotConfig(Properties botConfig) {
+	private void setBotConfig(Properties botConfig) {
 		this.botId = botConfig.getProperty("botId");
 		this.name = botConfig.getProperty("name");
 		this.link = botConfig.getProperty("link");
 		this.interval = Integer.parseInt(botConfig.getProperty("interval"));
-	}
-
-	public Properties getBotConfig() {
-		Properties getBotConfig = new Properties();
-		getBotConfig.put("link", this.link);
-		getBotConfig.put("name", this.name);
-		getBotConfig.put("botId", this.botId);
-		getBotConfig.put("interval", this.interval);
-		return getBotConfig;
-	}
-
-	public void setMailConfig(Properties mailConfiguration) {
-		this.mailConfiguration = mailConfiguration;
-	}
-
-	public Properties getMailConfig() {
-		return this.mailConfiguration;
 	}
 }

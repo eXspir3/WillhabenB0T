@@ -72,8 +72,9 @@ public class BotHandler {
 		this.innerMap = this.outerMap.get(botId);
 		if (this.innerMap == null) {
 			throw new IOException("Tried to stop Bot with ID: " + botId + " does not exist!");
+		} else {
+			interruptThread(this.innerMap.get("threadId"));
 		}
-		interruptThread(this.innerMap.get("threadId"));
 	}
 
 	/**
@@ -93,9 +94,10 @@ public class BotHandler {
 		System.out.println("Starting Existing Bot with ID " + botId);
 		this.createBot(botConfig, mailConfig);
 	}
-	
+
 	/**
 	 * Saves the Bot Configuration in HashMap outerMap to File
+	 * 
 	 * @throws IOException
 	 */
 	private void saveMap() throws IOException {
@@ -103,9 +105,10 @@ public class BotHandler {
 		outputStreamMap.writeObject(this.outerMap);
 		outputStreamMap.close();
 	}
-	
+
 	/**
 	 * Creates Bot Configuration HashMap outerMap by reading from File
+	 * 
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
