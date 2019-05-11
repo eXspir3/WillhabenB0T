@@ -53,7 +53,10 @@ public class WillhabenBot implements Runnable{
 			Elements strippedHtml = website.select("script");
 			Pattern noListingsPattern = Pattern.compile("(search_results_number\":\")(.{1,4}\\d)");
 			Matcher mat = noListingsPattern.matcher(strippedHtml.toString());
-			mat.find();
+			if(!mat.find()) {
+				System.out.println("mat.find Error");
+				this.run();
+			}
 			return Integer.parseInt(mat.group(2));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -113,22 +116,27 @@ public class WillhabenBot implements Runnable{
 		System.out.println("Timer Started: " + interval + " seconds");
 		    Thread.sleep(interval * 1000);
 	}
+	
 	/**
-	 * Method first called when new Thread is started
+	 * Method first called when new Thread is started, runs in a loop until thread is Interrupted
 	 */
 	public void run() {
 		try {
 			while(!Thread.currentThread().isInterrupted()){
-//				this.sendMail();
+				//this.sendMail();
 				this.isNew();
 				this.startTimer(this.interval);
 				}
 		} catch (Exception e) {
 			System.out.println("Thread Exit");
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
 	}
-
+	
+	/**
+	 * Set the botConfig (called by Constructor)
+	 * @param botConfig
+	 */
 	private void setBotConfig(Properties botConfig) {
 		this.botId = botConfig.getProperty("botId");
 		this.name = botConfig.getProperty("name");
