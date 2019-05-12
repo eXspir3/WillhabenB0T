@@ -1,11 +1,10 @@
 package java_server;
 
-import java.io.BufferedReader;	
+import java.io.BufferedReader;		
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.Base64;
-import java.util.Base64.Decoder;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;

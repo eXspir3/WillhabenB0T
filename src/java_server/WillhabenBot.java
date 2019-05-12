@@ -129,8 +129,8 @@ public class WillhabenBot implements Runnable{
 				this.startTimer(this.interval);
 				}
 		} catch (Exception e) {
+			Thread.currentThread().interrupt();
 			System.out.println("Thread Exit");
-			e.printStackTrace();
 		}
 	}
 	
