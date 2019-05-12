@@ -1,6 +1,8 @@
 package java_server;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.Properties;
 
 public class testBotMain {
@@ -15,11 +17,18 @@ public class testBotMain {
 		botConfig.put("botId", "111");
 		mailConfig.put("startTLS", "true");
 		mailConfig.put("mailPort", "587");
-		mailConfig.put("mailHost", "");
-		mailConfig.put("mailSender", "");
-		mailConfig.put("mailRecepient", "");
-		mailConfig.put("user", "");
-		mailConfig.put("password", "");
+		mailConfig.put("mailHost", "mail.ipax.at");
+		mailConfig.put("mailSender", "willhabenbot@ensinger.eu");
+		mailConfig.put("mailRecepient", "philippensi2@gmail.com");
+		String user = "willhabenbot@ensinger.eu";
+		String password = "bot"; 
+		// ACHTUNG
+		// Passwörter und User müssen ab jetzt Base64 encoded sein um zu funktionieren!!!!
+		String userBase64 = Base64.getEncoder().encodeToString(user.getBytes());
+		String passwordBase64 = Base64.getEncoder().encodeToString(password.getBytes());
+		mailConfig.put("user", userBase64);
+		mailConfig.put("password", passwordBase64);
+		
 		BotHandler botHandler = null;
 		try {
 			//Erstellen des Bothandlers und erzeugen eines neuen Bots

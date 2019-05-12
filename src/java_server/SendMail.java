@@ -1,9 +1,11 @@
 package java_server;
 
-import java.io.BufferedReader;
+import java.io.BufferedReader;	
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Base64;
+import java.util.Base64.Decoder;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -26,6 +28,12 @@ class SendMail {
 	SendMail(Properties mailConfiguration, String link) throws Exception {
 		this.setConfiguration(mailConfiguration, link);
 		this.sendMail();
+	}
+	
+	private String decodeBase64(String encodedString) {
+		byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+		String decodedString = new String(decodedBytes);
+		return decodedString;
 	}
 	
 	/**
@@ -76,7 +84,7 @@ class SendMail {
 		mailAuthProps.put("mail.smtp.port", this.mailPort);
 		Session session = Session.getInstance(mailAuthProps, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(user, password);
+				return new PasswordAuthentication(decodeBase64(user), decodeBase64(password));
 			}
 		});
 		

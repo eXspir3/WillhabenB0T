@@ -1,4 +1,3 @@
-1. Serverconfig in File (including Email Server Configuration)
 2. Throwing Exceptions if Server Config Wrong or not configured (and catching + sending to GUI with Error Codes)
 3. Encrypted Login
 4. Android App (Standalone Push) 
