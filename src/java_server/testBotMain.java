@@ -51,7 +51,7 @@ public class testBotMain {
 			botHandler.createBot(botConfig, mailConfig);
 			System.out.println(botHandler.getConfigurations());
 		} catch (IOException | ClassNotFoundException | InvalidKeyException | NoSuchAlgorithmException
-				| NoSuchPaddingException | InvalidKeySpecException | InterruptedException e) {
+				| NoSuchPaddingException | InvalidKeySpecException | InterruptedException | ValidationException e) {
 			System.out.println(e);
 		}
 	}
