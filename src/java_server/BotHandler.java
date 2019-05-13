@@ -1,27 +1,17 @@
 package java_server;
 
-import java.util.Properties;
+import java.util.Properties;	
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -29,14 +19,17 @@ import java.io.ObjectOutputStream;
 class BotHandler {
 
 	private String threadId;
+	private String fileName;
 	private SecretKey secretKey;
 	private Map<String, HashMap<String, String>> outerMap = new HashMap<String, HashMap<String, String>>();
 	private HashMap<String, String> innerMap = new HashMap<String, String>();
+	StreamCrypterAES fileCrypter = new StreamCrypterAES();
 
 	public BotHandler(String password) throws IOException, ClassNotFoundException, InvalidKeyException,
 			NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
-		this.secretKey = getKey(password);
-		File f = new File("botHandler.ini");
+		this.fileName = "botHandler.ini";
+		this.secretKey = fileCrypter.getKey(password);
+		File f = new File(this.fileName);
 		if (f.isFile() && f.canRead()) {
 			this.restoreMap();
 		}
@@ -189,7 +182,7 @@ class BotHandler {
 	 * @throws InvalidKeyException
 	 */
 	private void saveMap() throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-		ObjectOutputStream outputStreamMap = new ObjectOutputStream(encryptFile(this.secretKey));
+		ObjectOutputStream outputStreamMap = new ObjectOutputStream(fileCrypter.encryptFile(this.secretKey, this.fileName));
 		outputStreamMap.writeObject(this.outerMap);
 		outputStreamMap.close();
 	}
@@ -207,7 +200,7 @@ class BotHandler {
 	private void restoreMap() throws IOException, ClassNotFoundException, InvalidKeyException, NoSuchAlgorithmException,
 			NoSuchPaddingException {
 		System.out.println("Restoring Map ....");
-		ObjectInputStream inputStreamMap = new ObjectInputStream(decryptFile(this.secretKey));
+		ObjectInputStream inputStreamMap = new ObjectInputStream(fileCrypter.decryptFile(this.secretKey, this.fileName));
 		this.outerMap = (Map<String, HashMap<String, String>>) inputStreamMap.readObject();
 		inputStreamMap.close();
 	}
@@ -309,58 +302,4 @@ class BotHandler {
 		this.outerMap.put(botConfig.getProperty("botId"), this.innerMap);
 		this.saveMap();
 	}
-
-	/**
-	 * Generates the SecretKey used in AES Encryption of File by using PBKDF2 + HMAC
-	 * + SHA512, uses static salt because salt is not needed in this usecase
-	 * 
-	 * @param password the password the Key is derived from
-	 * @return
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeySpecException
-	 */
-	private SecretKey getKey(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		byte[] salt = new String("12345678").getBytes();
-		SecretKeyFactory secretKeyFactory;
-		secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-		KeySpec passwordBasedEncryptionKeySpec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
-		SecretKey secretKeyFromPBKDF2 = secretKeyFactory.generateSecret(passwordBasedEncryptionKeySpec);
-		SecretKey secretKey = new SecretKeySpec(secretKeyFromPBKDF2.getEncoded(), "AES");
-		return secretKey;
-	}
-
-	/**
-	 * Used to decrypt the handlerConfig.ini File with the given AES Key
-	 * 
-	 * @param decryptKey
-	 * @return
-	 * @throws FileNotFoundException
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 * @throws InvalidKeyException
-	 */
-	private CipherInputStream decryptFile(SecretKey decryptKey)
-			throws FileNotFoundException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException {
-		Cipher cipher = Cipher.getInstance("AES");
-		cipher.init(Cipher.DECRYPT_MODE, decryptKey);
-		return new CipherInputStream(new FileInputStream("botHandler.ini"), cipher);
-	}
-
-	/**
-	 * Used to encrypt the handlerConfig.ini File with the given AES Key
-	 * 
-	 * @param encryptKey
-	 * @return
-	 * @throws FileNotFoundException
-	 * @throws InvalidKeyException
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 */
-	private CipherOutputStream encryptFile(SecretKey encryptKey)
-			throws FileNotFoundException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-		Cipher cipher = Cipher.getInstance("AES");
-		cipher.init(Cipher.ENCRYPT_MODE, encryptKey);
-		return new CipherOutputStream(new FileOutputStream("botHandler.ini"), cipher);
-	}
-
 }
