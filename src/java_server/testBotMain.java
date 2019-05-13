@@ -36,16 +36,20 @@ public class testBotMain {
 		mailConfig.put("user", userBase64);
 		mailConfig.put("password", passwordBase64);
 		// plainPassword String for BotHandler encryption / decryption
-		String plainPassword = "GeheimesPasswort";
-
 		try {
-			BotHandler botHandler = new BotHandler("GeheimesPasswort");
+			String plainPassword = "GeheimesPasswort";
+			BotHandler botHandler = new BotHandler(plainPassword);
 			botHandler.createBot(botConfig, mailConfig);
-			Thread.sleep(10000);
+			Thread.sleep(8000);
 			botHandler.stopBot("111");
-			botHandler = new BotHandler("GeheimesPasswort");
+			botHandler = new BotHandler(plainPassword);
 			Thread.sleep(2000);
 			botHandler.startBot("111");
+			botConfig.put("botId", "112");
+			botHandler.createBot(botConfig, mailConfig);
+			botConfig.put("botId", "113");
+			botHandler.createBot(botConfig, mailConfig);
+			System.out.println(botHandler.getConfigurations());
 		} catch (IOException | ClassNotFoundException | InvalidKeyException | NoSuchAlgorithmException
 				| NoSuchPaddingException | InvalidKeySpecException | InterruptedException e) {
 			System.out.println(e);

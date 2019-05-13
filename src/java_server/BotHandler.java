@@ -47,9 +47,6 @@ public class BotHandler {
 	 * Thread. Configuration and associated threadId are saved to Hashmap via
 	 * Function addThreadToMap
 	 * 
-	 * Also used to Change Configuration of existing Bot - just call createBot with
-	 * same botId as existing bot in botConfig
-	 * 
 	 * @param botConfig  Bot Configuration consisting of 'link', 'name', 'botId',
 	 *                   'interval'
 	 * @param mailConfig mailConfiguration constisting of 'startTLS', 'mailHost',
@@ -63,7 +60,7 @@ public class BotHandler {
 	public void createBot(Properties botConfig, Properties mailConfig)
 			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
 		if (existsBot(botConfig.getProperty("botId"))) {
-			stopBot(botConfig.getProperty("botId"));
+			throw new IOException("Tried to Create Bot that already exists, Bot ID: " + botConfig.getProperty("botId"));
 		}
 		Thread newBotThread = new Thread(new WillhabenBot(botConfig, mailConfig));
 		this.threadId = String.valueOf(newBotThread.getId());
@@ -74,6 +71,37 @@ public class BotHandler {
 		this.addThreadToMap(botConfig, mailConfig, this.threadId);
 		newBotThread.start();
 		System.out.println("BotHandler Created Bot with ThreadId " + this.threadId);
+	}
+
+	/**
+	 * Function to change options of Existing Bot - same Functionality as createBot,
+	 * but stops Bot before overwriting Config
+	 * 
+	 * @param botConfig  Bot Configuration consisting of 'link', 'name', 'botId',
+	 *                   'interval'
+	 * @param mailConfig mailConfiguration constisting of 'startTLS', 'mailHost',
+	 *                   'mailPort', 'mailSender', 'mailRecepient', 'link', (Base64)
+	 *                   'user', (Base64) 'password'
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
+	public void changeBot(Properties botConfig, Properties mailConfig)
+			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+		if (existsBot(botConfig.getProperty("botId"))) {
+			stopBot(botConfig.getProperty("botId"));
+		}
+		Thread newBotThread = new Thread(new WillhabenBot(botConfig, mailConfig));
+		this.threadId = String.valueOf(newBotThread.getId());
+		if (this.threadId == "" | this.threadId == null) {
+			throw new IOException(
+					"ThreadId was null or empty after creating Thread for Bot ID: " + botConfig.getProperty("botId"));
+		}
+		this.addThreadToMap(botConfig, mailConfig, this.threadId);
+		newBotThread.start();
+		System.out.println("BotHandler Changed Bot with ThreadId " + this.threadId);
+
 	}
 
 	/**
@@ -130,25 +158,15 @@ public class BotHandler {
 		Properties botConfig = convertToBotConfig(this.innerMap);
 		Properties mailConfig = convertToMailConfig(this.innerMap);
 		System.out.println("Starting Existing Bot with ID " + botId);
-		this.createBot(botConfig, mailConfig);
+		this.changeBot(botConfig, mailConfig);
 	}
 	
 	/**
-	 * Function to change options of Existing Bot (calls create Bot, and overwrites Properties of existing Bot)
-	 * if Bot does not exist - creates a new one
-	 * @param botConfig  Bot Configuration consisting of 'link', 'name', 'botId',
-	 *                   'interval'
-	 * @param mailConfig mailConfiguration constisting of 'startTLS', 'mailHost',
-	 *                   'mailPort', 'mailSender', 'mailRecepient', 'link', (Base64)
-	 *                   'user', (Base64) 'password'
-	 * @throws InvalidKeyException
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 * @throws IOException
+	 * Getter for current Configuration
+	 * @return HashMap with all Configurations
 	 */
-	public void changeBot(Properties botConfig, Properties mailConfig)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
-		this.createBot(botConfig, mailConfig);
+	public Map<String, HashMap<String, String>> getConfigurations(){
+		return this.outerMap;
 	}
 
 	/**
