@@ -1,7 +1,9 @@
 package java_server;
 
-import java.util.Properties;	
+import java.util.Properties;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -11,6 +13,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,12 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.util.HashMap;
-import java.util.Map;
 
 public class BotHandler {
 
@@ -47,7 +47,8 @@ public class BotHandler {
 	 * Thread. Configuration and associated threadId are saved to Hashmap via
 	 * Function addThreadToMap
 	 * 
-	 * Also used to Change Configuration of existing Bot - just call createBot with same botId as existing bot in botConfig
+	 * Also used to Change Configuration of existing Bot - just call createBot with
+	 * same botId as existing bot in botConfig
 	 * 
 	 * @param botConfig  Bot Configuration consisting of 'link', 'name', 'botId',
 	 *                   'interval'
@@ -61,7 +62,7 @@ public class BotHandler {
 	 */
 	public void createBot(Properties botConfig, Properties mailConfig)
 			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-		if(existsBot(botConfig.getProperty("botId"))){
+		if (existsBot(botConfig.getProperty("botId"))) {
 			stopBot(botConfig.getProperty("botId"));
 		}
 		Thread newBotThread = new Thread(new WillhabenBot(botConfig, mailConfig));
@@ -131,6 +132,24 @@ public class BotHandler {
 		System.out.println("Starting Existing Bot with ID " + botId);
 		this.createBot(botConfig, mailConfig);
 	}
+	
+	/**
+	 * Function to change options of Existing Bot (calls create Bot, and overwrites Properties of existing Bot)
+	 * if Bot does not exist - creates a new one
+	 * @param botConfig  Bot Configuration consisting of 'link', 'name', 'botId',
+	 *                   'interval'
+	 * @param mailConfig mailConfiguration constisting of 'startTLS', 'mailHost',
+	 *                   'mailPort', 'mailSender', 'mailRecepient', 'link', (Base64)
+	 *                   'user', (Base64) 'password'
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws IOException
+	 */
+	public void changeBot(Properties botConfig, Properties mailConfig)
+			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+		this.createBot(botConfig, mailConfig);
+	}
 
 	/**
 	 * Saves the Bot Configuration in HashMap outerMap to File
@@ -155,6 +174,7 @@ public class BotHandler {
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeyException
 	 */
+	@SuppressWarnings("unchecked")
 	private void restoreMap() throws IOException, ClassNotFoundException, InvalidKeyException, NoSuchAlgorithmException,
 			NoSuchPaddingException {
 		System.out.println("Restoring Map ....");
@@ -201,6 +221,7 @@ public class BotHandler {
 	 * @return Converted HashMap
 	 */
 	private Map<String, String> convertToMap(Properties props) {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Map<String, String> propMap = new HashMap(props);
 		return propMap;
 	}

@@ -1,6 +1,6 @@
 package java_server;
 
-import java.io.BufferedReader;		
+import java.io.BufferedReader;	
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
@@ -18,7 +18,7 @@ class SendMail {
 	boolean startTLS = false;
 	int mailPort = 25;
 	String mailHost = "";
-	String mailSender = "willhabenbot@noaddressentered.net";
+	String mailSender = "willhabenbot@noaddresseconfigured.net";
 	String mailRecepient = "";
 	String user = "";
 	String password = "";
@@ -29,14 +29,20 @@ class SendMail {
 		this.sendMail();
 	}
 	
+	/**
+	 * Decodes Auth-Data from Base64
+	 * @param encodedString
+	 * @return
+	 */
 	private String decodeBase64(String encodedString) {
 		byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
 		String decodedString = new String(decodedBytes);
 		return decodedString;
 	}
-	
+
 	/**
 	 * Sets all Configurations for SendMail Class (called by Constructor)
+	 * 
 	 * @param mailConfiguration
 	 * @param link
 	 */
@@ -50,21 +56,23 @@ class SendMail {
 		this.password = mailConfiguration.getProperty("password");
 		this.link = link;
 	}
-	
+
 	/**
-	 * Loads the mailTemplate.html from File into String and alters content accordingly
+	 * Loads the mailTemplate.html from File into String and alters content
+	 * accordingly
+	 * 
 	 * @param link Link to new Listings
 	 * @return
 	 * @throws IOException
 	 */
 	private String forgeMail(String link) throws IOException {
 		StringBuilder mailBuilder = new StringBuilder();
-		    BufferedReader in = new BufferedReader(new FileReader("mailTemplate.html"));
-		    String str;
-		    while ((str = in.readLine()) != null) {
-		        mailBuilder.append(str);
-		    }
-		    in.close();
+		BufferedReader in = new BufferedReader(new FileReader("mailTemplate.html"));
+		String str;
+		while ((str = in.readLine()) != null) {
+			mailBuilder.append(str);
+		}
+		in.close();
 		String mail = mailBuilder.toString();
 		mail = mail.replaceAll("UrlToBeReplaced", this.link);
 		return mail;
@@ -72,6 +80,7 @@ class SendMail {
 
 	/**
 	 * Creates SMTP Session and authenticates to Server, then sends Mail
+	 * 
 	 * @throws Exception
 	 */
 	private void sendMail() throws Exception {
@@ -86,7 +95,7 @@ class SendMail {
 				return new PasswordAuthentication(decodeBase64(user), decodeBase64(password));
 			}
 		});
-		
+
 		try {
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(this.mailSender));

@@ -7,7 +7,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WillhabenBot implements Runnable{
+public class WillhabenBot implements Runnable {
 
 	private String link = null;
 	private String name = null;
@@ -53,7 +53,7 @@ public class WillhabenBot implements Runnable{
 			Elements strippedHtml = website.select("script");
 			Pattern noListingsPattern = Pattern.compile("(search_results_number\":\")(.{1,4}\\d)");
 			Matcher mat = noListingsPattern.matcher(strippedHtml.toString());
-			if(!mat.find()) {
+			if (!mat.find()) {
 				System.out.println("mat.find Error");
 				this.run();
 			}
@@ -81,7 +81,7 @@ public class WillhabenBot implements Runnable{
 	 * @throws Exception
 	 */
 	private void isNew() throws Exception {
-		
+
 		System.out.println("isNew Called");
 		System.out.println("Current Number of Listings: " + this.noListings);
 		int newNumberOfListings = updateNumberOfListings();
@@ -107,35 +107,39 @@ public class WillhabenBot implements Runnable{
 	private void sendMail() throws Exception {
 		SendMail mail = new SendMail(this.mailConfiguration, this.botConfig.getProperty("link"));
 	}
+
 	/**
 	 * Puts Thread to sleep for given amount of Time
+	 * 
 	 * @param interval
 	 * @throws Exception
 	 */
 	private void startTimer(int interval) throws Exception {
 		System.out.println("Timer Started: " + interval + " seconds");
-		    Thread.sleep(interval * 1000);
+		Thread.sleep(interval * 1000);
 	}
-	
+
 	/**
-	 * Method first called when new Thread is started, runs in a loop until thread is Interrupted
+	 * Method first called when new Thread is started, runs in a loop until thread
+	 * is Interrupted
 	 */
 	public void run() {
 		try {
-			while(!Thread.currentThread().isInterrupted()){
-				//Uncomment for Testing sendMail()
-				//this.sendMail();
+			while (!Thread.currentThread().isInterrupted()) {
+				// Uncomment for Testing sendMail()
+				// this.sendMail();
 				this.isNew();
 				this.startTimer(this.interval);
-				}
+			}
 		} catch (Exception e) {
 			Thread.currentThread().interrupt();
 			System.out.println("Thread Exit");
 		}
 	}
-	
+
 	/**
 	 * Set the botConfig (called by Constructor)
+	 * 
 	 * @param botConfig
 	 */
 	private void setBotConfig(Properties botConfig) {
