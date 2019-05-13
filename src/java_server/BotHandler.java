@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class BotHandler {
+class BotHandler {
 
 	private String threadId;
 	private SecretKey secretKey;
@@ -59,6 +59,7 @@ public class BotHandler {
 	 */
 	public void createBot(Properties botConfig, Properties mailConfig)
 			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+		this.validateConfigs(botConfig, mailConfig);
 		if (existsBot(botConfig.getProperty("botId"))) {
 			throw new IOException("Tried to Create Bot that already exists, Bot ID: " + botConfig.getProperty("botId"));
 		}
@@ -89,6 +90,7 @@ public class BotHandler {
 	 */
 	public void changeBot(Properties botConfig, Properties mailConfig)
 			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IOException {
+		this.validateConfigs(botConfig, mailConfig);
 		if (existsBot(botConfig.getProperty("botId"))) {
 			stopBot(botConfig.getProperty("botId"));
 		}
@@ -167,6 +169,15 @@ public class BotHandler {
 	 */
 	public Map<String, HashMap<String, String>> getConfigurations(){
 		return this.outerMap;
+	}
+	
+	/**
+	 * Validate botConfig and mailConfig - e.g. only valid Email-Formats allowed in mailSender
+	 * @param botConfig
+	 * @param mailConfig
+	 * @throws Exception
+	 */
+	private void validateConfigs(Properties botConfig, Properties mailConfig) throws IOException {
 	}
 
 	/**

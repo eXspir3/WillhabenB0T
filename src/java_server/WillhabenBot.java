@@ -7,21 +7,44 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WillhabenBot implements Runnable {
+class WillhabenBot implements Runnable {
 
 	private String link = null;
-	private String name = null;
-	private String botId = null;
 	private int interval = -1;
 	private int noListings = 0;
+	@SuppressWarnings("unused")
+	private String botId;
+	@SuppressWarnings("unused")
+	private String name;
 	private Properties mailConfiguration;
 	private Properties botConfig;
 
 	public WillhabenBot(Properties botConfig, Properties mailConfiguration) {
 		this.botConfig = botConfig;
-		this.setBotConfig(botConfig);
+		this.botId = botConfig.getProperty("botId");
+		this.name = botConfig.getProperty("name");
+		this.link = botConfig.getProperty("link");
+		this.interval = Integer.parseInt(botConfig.getProperty("interval"));
 		this.mailConfiguration = mailConfiguration;
 		this.noListings = this.updateNumberOfListings();
+	}
+
+	/**
+	 * Method first called when new Thread is started, runs in a loop until thread
+	 * is Interrupted
+	 */
+	public void run() {
+		try {
+			while (!Thread.currentThread().isInterrupted()) {
+				// Uncomment for Testing sendMail()
+				// this.sendMail();
+				this.isNew();
+				this.startTimer(this.interval);
+			}
+		} catch (Exception e) {
+			Thread.currentThread().interrupt();
+			System.out.println("Thread Exit");
+		}
 	}
 
 	/**
@@ -105,6 +128,7 @@ public class WillhabenBot implements Runnable {
 	 * @throws Exception
 	 */
 	private void sendMail() throws Exception {
+		@SuppressWarnings("unused")
 		SendMail mail = new SendMail(this.mailConfiguration, this.botConfig.getProperty("link"));
 	}
 
@@ -117,35 +141,5 @@ public class WillhabenBot implements Runnable {
 	private void startTimer(int interval) throws Exception {
 		System.out.println("Timer Started: " + interval + " seconds");
 		Thread.sleep(interval * 1000);
-	}
-
-	/**
-	 * Method first called when new Thread is started, runs in a loop until thread
-	 * is Interrupted
-	 */
-	public void run() {
-		try {
-			while (!Thread.currentThread().isInterrupted()) {
-				// Uncomment for Testing sendMail()
-				// this.sendMail();
-				this.isNew();
-				this.startTimer(this.interval);
-			}
-		} catch (Exception e) {
-			Thread.currentThread().interrupt();
-			System.out.println("Thread Exit");
-		}
-	}
-
-	/**
-	 * Set the botConfig (called by Constructor)
-	 * 
-	 * @param botConfig
-	 */
-	private void setBotConfig(Properties botConfig) {
-		this.botId = botConfig.getProperty("botId");
-		this.name = botConfig.getProperty("name");
-		this.link = botConfig.getProperty("link");
-		this.interval = Integer.parseInt(botConfig.getProperty("interval"));
 	}
 }

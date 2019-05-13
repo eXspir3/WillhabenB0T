@@ -24,10 +24,10 @@ public class testBotMain {
 		mailConfig.put("startTLS", "true");
 		mailConfig.put("mailPort", "587");
 		mailConfig.put("mailHost", "mail.ipax.at");
-		mailConfig.put("mailSender", "FILL");
-		mailConfig.put("mailRecepient", "FILL");
-		String user = "FILL";
-		String password = "FILL";
+		mailConfig.put("mailSender", "");
+		mailConfig.put("mailRecepient", "");
+		String user = "";
+		String password = "";
 		// ACHTUNG
 		// Passwörter und User müssen ab jetzt Base64 encoded sein um zu
 		// funktionieren!!!!
