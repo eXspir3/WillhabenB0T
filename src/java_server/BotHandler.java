@@ -17,6 +17,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 class BotHandler {
+	private final String mailSenderRecepientRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]"
+			+ "+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21"
+			+ "\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)"
+			+ "+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]"
+			+ "|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01"
+			+ "-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+	private final String mailHostRegex = "^((\\*)|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]"
+			+ "|[01]?[0-9][0-9]?)|((\\*\\.)?([a-zA-Z0-9-]+\\.){0,5}[a-zA-Z0-9-][a-zA-Z0-9-]+\\.[a-zA-Z]{2,63}?))$";
+	private final String mailPortRegex = "^[0-9]{1,5}$";
+	private final String botIntervalRegex = "([4-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]|[1-8][0-9]{3}|9[0-8]"
+			+ "[0-9]{2}|99[0-8][0-9]|999[0-9]|[1-8][0-9]{4}|9[0-8][0-9]{3}|99[0-8][0-9]{2}|999[0-8][0-9]|9999[0-9]"
+			+ "|[1-5][0-9]{5}|60[0-3][0-9]{3}|604[0-7][0-9]{2}|604800)";
+	private final String botLinkRegex = "(https?:\\/\\/(.+?\\.)?willhaben\\.at(\\/[A-Za-z0-9\\"
+			+ "-\\._~:\\/\\?#\\[\\]@!$&'\\(\\)\\*\\+,;\\=]*)?)";
+	private final String botBotIdRegex = "^[0-9]{1,3}$";
+	private final String botNameRegex = "^[a-zA-Z0-9]{1,32}$";
 
 	private String threadId;
 	private String fileName;
@@ -55,7 +71,7 @@ class BotHandler {
 	 */
 	public void createBot(Properties botConfig, Properties mailConfig) throws ValidationException, IOException,
 			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-		//this.validateConfigs(botConfig, mailConfig);
+		this.validateConfigs(botConfig, mailConfig);
 		if (existsBot(botConfig.getProperty("botId"))) {
 			throw new IOException("Tried to Create Bot that already exists, Bot ID: " + botConfig.getProperty("botId"));
 		}
@@ -88,7 +104,7 @@ class BotHandler {
 	 */
 	public void changeBot(Properties botConfig, Properties mailConfig) throws ValidationException, IOException,
 			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-		//this.validateConfigs(botConfig, mailConfig);
+		this.validateConfigs(botConfig, mailConfig);
 		if (existsBot(botConfig.getProperty("botId"))) {
 			stopBot(botConfig.getProperty("botId"));
 		}
@@ -182,14 +198,15 @@ class BotHandler {
 	 * @throws Exception
 	 */
 	private void validateConfigs(Properties botConfig, Properties mailConfig) throws ValidationException {
-		String[] botConfigRegex = {};
-		String[] botConfigKeys = {};
-		String[] mailConfigRegex = {};
-		String[] mailConfigKeys = {};
-
-		this.configValidator = new ConfigValidator(botConfigKeys, botConfigRegex);
+		final String[] botRegexKeys = { "botId", "name", "link", "interval" };
+		final String[] mailRegexKeys = { "mailPort", "mailHost", "mailSender", "mailRecepient" };
+		final String[] botConfigRegex = { botBotIdRegex, botNameRegex, botLinkRegex, botIntervalRegex };
+		final String[] mailConfigRegex = { mailPortRegex, mailHostRegex, mailSenderRecepientRegex,
+				mailSenderRecepientRegex };
+		
+		this.configValidator = new ConfigValidator(botRegexKeys, botConfigRegex);
 		this.configValidator.validateProperty(botConfig);
-		this.configValidator = new ConfigValidator(mailConfigKeys, mailConfigRegex);
+		this.configValidator = new ConfigValidator(mailRegexKeys, mailConfigRegex);
 		this.configValidator.validateProperty(mailConfig);
 	}
 

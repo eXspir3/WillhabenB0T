@@ -19,11 +19,11 @@ public class testBotMain {
 		botConfig.put("link",
 				"https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=Xiaomi+m365&attribute_tree_level_0=&attribute_tree_level_1=&typedKeyword=Xiaomi+m365");
 		botConfig.put("name", "TestName");
-		botConfig.put("interval", "30");
+		botConfig.put("interval", "40");
 		botConfig.put("botId", "111");
 		mailConfig.put("startTLS", "true");
 		mailConfig.put("mailPort", "587");
-		mailConfig.put("mailHost", "mail.ipax.at");
+		mailConfig.put("mailHost", "");
 		mailConfig.put("mailSender", "");
 		mailConfig.put("mailRecepient", "");
 		String user = "";

@@ -25,10 +25,11 @@ class ConfigValidator {
 		for (Entry<String, String> entry : this.keyToRegex.entrySet()) {
 			Pattern configPattern = Pattern.compile(entry.getValue());
 			String toValidate = property.getProperty(entry.getKey());
+//			System.out.println(configPattern.toString() + " matches Type: -" + entry.getKey() + "- with String: " + toValidate);
 			Matcher mat = configPattern.matcher(toValidate);
-			mat.find();
-			if (!(mat.group(0).equals(toValidate))) {
-				throw new ValidationException("Validation unssuccesful for key" + toValidate, 1);
+			boolean check = mat.find();
+			if (!check || !(mat.group(0).equals(toValidate))) {
+				throw new ValidationException("Validation unsuccessful for String: \"" + toValidate + "\" in Key: " + entry.getKey(), 1);
 			}
 		}
 	}

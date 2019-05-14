@@ -12,7 +12,7 @@ class ValidationException extends Exception {
 	
 	@Override
 	public String toString() {
-		return "Exception occured" + this.message;
+		return "Exception occured - " + this.message;
 	}
 	@Override
 	public String getMessage() {
