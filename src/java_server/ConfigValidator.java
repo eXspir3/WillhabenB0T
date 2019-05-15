@@ -9,17 +9,25 @@ import java.util.Properties;
 
 class ConfigValidator {
 	private Map<String, String> keyToRegex = null;
-	
-	public ConfigValidator(Map<String, String> regexMap) throws ValidationException {
+
+	ConfigValidator(Map<String, String> regexMap) throws ValidationException {
 		this.keyToRegex = regexMap;
 	}
-	
-	public ConfigValidator(String[] configKeys, String[] regex) throws ValidationException {
+
+	ConfigValidator(String[] configKeys, String[] regex) throws ValidationException {
 		this.keyToRegex = convertToMap(configKeys, regex);
 	}
 
-	public void validateProperty(Properties property) throws ValidationException {
-		if(keyToRegex == null || keyToRegex.isEmpty()) {
+	/**
+	 * Validates certain values in a property by using a regexmap which is mapping
+	 * keys of property to the regular Expression the value of this key should be
+	 * validated with.
+	 * 
+	 * @param property Property to be Validated
+	 * @throws ValidationException
+	 */
+	void validateProperty(Properties property) throws ValidationException {
+		if (keyToRegex == null || keyToRegex.isEmpty()) {
 			throw new ValidationException("keyToRegex Map was null or empty", 3);
 		}
 		for (Entry<String, String> entry : this.keyToRegex.entrySet()) {
@@ -29,11 +37,22 @@ class ConfigValidator {
 			Matcher mat = configPattern.matcher(toValidate);
 			boolean check = mat.find();
 			if (!check || !(mat.group(0).equals(toValidate))) {
-				throw new ValidationException("Validation unsuccessful for String: \"" + toValidate + "\" in Key: " + entry.getKey(), 1);
+				throw new ValidationException(
+						"Validation unsuccessful for String: \"" + toValidate + "\" in Key: " + entry.getKey(), 1);
 			}
 		}
 	}
 
+	/**
+	 * Converts 2 String arrays to a map
+	 * 
+	 * @param configKeys Keys of Property where values are to be validated
+	 * @param regex      Regular Expressions the values of keys in configKeys should
+	 *                   be validated with
+	 * 
+	 * @return Map mapped configKeys[] as key --> regex[] as value
+	 * @throws ValidationException
+	 */
 	private Map<String, String> convertToMap(String[] configKeys, String[] regex) throws ValidationException {
 		Map<String, String> convertedMap = new HashMap<String, String>();
 		if (configKeys.length == regex.length) {

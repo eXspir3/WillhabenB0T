@@ -17,7 +17,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-class StreamCrypterAES {
+public class StreamCrypterAES {
 	Cipher cipher = null;
 	byte[] salt = null;
 	

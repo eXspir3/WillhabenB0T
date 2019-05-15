@@ -36,7 +36,7 @@ class WillhabenBot implements Runnable {
 	public void run() {
 		try {
 			while (!Thread.currentThread().isInterrupted()) {
-				// Uncomment for Testing sendMail()
+				// Uncomment next Line for Testing sendMail()
 				// this.sendMail();
 				this.isNew();
 				this.startTimer(this.interval);

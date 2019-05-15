@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-class BotHandler {
+public class BotHandler {
 	private final String mailSenderRecepientRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]"
 			+ "+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21"
 			+ "\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)"
@@ -39,8 +39,8 @@ class BotHandler {
 	private SecretKey secretKey;
 	private Map<String, HashMap<String, String>> outerMap = new HashMap<String, HashMap<String, String>>();
 	private HashMap<String, String> innerMap = new HashMap<String, String>();
-	StreamCrypterAES fileCrypter = new StreamCrypterAES();
-	ConfigValidator configValidator = null;
+	private StreamCrypterAES fileCrypter = new StreamCrypterAES();
+	private ConfigValidator configValidator = null;
 
 	public BotHandler(String password) throws IOException, ClassNotFoundException, InvalidKeyException,
 			NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
@@ -204,10 +204,10 @@ class BotHandler {
 		final String[] mailConfigRegex = { mailPortRegex, mailHostRegex, mailSenderRecepientRegex,
 				mailSenderRecepientRegex };
 		
-		this.configValidator = new ConfigValidator(botRegexKeys, botConfigRegex);
-		this.configValidator.validateProperty(botConfig);
-		this.configValidator = new ConfigValidator(mailRegexKeys, mailConfigRegex);
-		this.configValidator.validateProperty(mailConfig);
+		configValidator = new ConfigValidator(botRegexKeys, botConfigRegex);
+		configValidator.validateProperty(botConfig);
+		configValidator = new ConfigValidator(mailRegexKeys, mailConfigRegex);
+		configValidator.validateProperty(mailConfig);
 	}
 
 	/**
