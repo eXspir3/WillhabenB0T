@@ -1,8 +1,10 @@
 package java_server;
 
-import java.io.FileInputStream;
+import java.io.FileInputStream;	
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -18,46 +20,15 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class StreamCrypterAES {
+public class EncryptorAES {
 	private Cipher cipher = null;
 	
-	public StreamCrypterAES() throws NoSuchAlgorithmException, NoSuchPaddingException{
+	public EncryptorAES() throws NoSuchAlgorithmException, NoSuchPaddingException{
 		this.cipher = Cipher.getInstance("AES");
 	}
-
+	
 	/**
-	 * Generates the SecretKey used in AES Encryption of File by using PBKDF2 + HMAC
-	 * + SHA512, uses static salt because salt is not needed in this usecase
-	 * 
-	 * @param password the password the Key is derived from
-	 * @return
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeySpecException
-	 */
-	private SecretKey getKey(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		SecretKeyFactory secretKeyFactory;
-		secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
-		KeySpec passwordBasedEncryptionKeySpec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
-		SecretKey secretKeyFromPBKDF2 = secretKeyFactory.generateSecret(passwordBasedEncryptionKeySpec);
-		SecretKey secretKey = new SecretKeySpec(secretKeyFromPBKDF2.getEncoded(), "AES");
-		return secretKey;
-	}
-
-	/**
-	 * Generates Pseudo Random Salt for SecretKey
-	 * 
-	 * @return byte Array with salt
-	 * @throws NoSuchAlgorithmException
-	 */
-	private byte[] getSalt() throws NoSuchAlgorithmException {
-		SecureRandom sr = new SecureRandom();
-		byte[] salt = new byte[16];
-		sr.nextBytes(salt);
-		return salt;
-	}
-
-	/**
-	 * Used to decrypt the handlerConfig.ini File with the given AES Key
+	 * Used to decrypt the handlerConfig.ini File with the given password
 	 * 
 	 * @param decryptKey
 	 * @return
@@ -98,5 +69,35 @@ public class StreamCrypterAES {
 		unencryptedStream.close();
 		return new CipherOutputStream(new FileOutputStream(fileName, true), this.cipher);
 	}
+	
+	/**
+	 * Generates the SecretKey used in AES Encryption of File by using PBKDF2 + HMAC
+	 * + SHA512, uses static salt because salt is not needed in this usecase
+	 * 
+	 * @param password the password the Key is derived from
+	 * @return
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 */
+	private SecretKey getKey(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+		SecretKeyFactory secretKeyFactory;
+		secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+		KeySpec passwordBasedEncryptionKeySpec = new PBEKeySpec(password.toCharArray(), salt, 10000, 256);
+		SecretKey secretKeyFromPBKDF2 = secretKeyFactory.generateSecret(passwordBasedEncryptionKeySpec);
+		SecretKey secretKey = new SecretKeySpec(secretKeyFromPBKDF2.getEncoded(), "AES");
+		return secretKey;
+	}
 
+	/**
+	 * Generates Pseudo Random Salt for SecretKey
+	 * 
+	 * @return byte Array with salt
+	 * @throws NoSuchAlgorithmException
+	 */
+	private byte[] getSalt() throws NoSuchAlgorithmException {
+		SecureRandom sr = new SecureRandom();
+		byte[] salt = new byte[16];
+		sr.nextBytes(salt);
+		return salt;
+	}
 }
