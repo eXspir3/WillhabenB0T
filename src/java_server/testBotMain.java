@@ -23,11 +23,11 @@ public class testBotMain {
 		botConfig.put("botId", "111");
 		mailConfig.put("startTLS", "true");
 		mailConfig.put("mailPort", "587");
-		mailConfig.put("mailHost", "");
-		mailConfig.put("mailSender", "");
-		mailConfig.put("mailRecepient", "");
-		String user = "";
-		String password = "";
+		mailConfig.put("mailHost", "mail.ipax.at");
+		mailConfig.put("mailSender", "willhabenbot@ensinger.eu");
+		mailConfig.put("mailRecepient", "philippensi2@gmail.com");
+		String user = "willhabenbot@ensinger.eu";
+		String password = "bot";
 		// ACHTUNG
 		// Passwörter und User müssen ab jetzt Base64 encoded sein um zu
 		// funktionieren!!!!
@@ -40,7 +40,7 @@ public class testBotMain {
 			String plainPassword = "GeheimesPasswort";
 			BotHandler botHandler = new BotHandler(plainPassword);
 			botHandler.createBot(botConfig, mailConfig);
-			Thread.sleep(8000);
+			Thread.sleep(3000);
 			botHandler.stopBot("111");
 			botHandler = new BotHandler(plainPassword);
 			Thread.sleep(2000);
@@ -51,7 +51,7 @@ public class testBotMain {
 			botHandler.createBot(botConfig, mailConfig);
 			System.out.println(botHandler.getConfigurations());
 		} catch (IOException | ClassNotFoundException | InvalidKeyException | NoSuchAlgorithmException
-				| NoSuchPaddingException | InvalidKeySpecException | InterruptedException | ValidationException e) {
+				| NoSuchPaddingException | InvalidKeySpecException | ValidationException | InterruptedException e) {
 			System.out.println(e);
 		}
 	}

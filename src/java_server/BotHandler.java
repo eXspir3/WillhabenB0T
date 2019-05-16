@@ -3,10 +3,10 @@ package java_server;
 import java.util.Properties;
 import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -26,9 +26,7 @@ public class BotHandler {
 	private final String mailHostRegex = "^((\\*)|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]"
 			+ "|[01]?[0-9][0-9]?)|((\\*\\.)?([a-zA-Z0-9-]+\\.){0,5}[a-zA-Z0-9-][a-zA-Z0-9-]+\\.[a-zA-Z]{2,63}?))$";
 	private final String mailPortRegex = "^[0-9]{1,5}$";
-	private final String botIntervalRegex = "([4-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]|[1-8][0-9]{3}|9[0-8]"
-			+ "[0-9]{2}|99[0-8][0-9]|999[0-9]|[1-8][0-9]{4}|9[0-8][0-9]{3}|99[0-8][0-9]{2}|999[0-8][0-9]|9999[0-9]"
-			+ "|[1-5][0-9]{5}|60[0-3][0-9]{3}|604[0-7][0-9]{2}|604800)";
+	private final String botIntervalRegex = "([4-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]|[12][0-9]{3}|3[0-5][0-9]{2}|3600)";
 	private final String botLinkRegex = "(https?:\\/\\/(.+?\\.)?willhaben\\.at(\\/[A-Za-z0-9\\"
 			+ "-\\._~:\\/\\?#\\[\\]@!$&'\\(\\)\\*\\+,;\\=]*)?)";
 	private final String botBotIdRegex = "^[0-9]{1,3}$";
@@ -36,7 +34,7 @@ public class BotHandler {
 
 	private String threadId;
 	private String fileName;
-	private SecretKey secretKey;
+	private String password;
 	private Map<String, HashMap<String, String>> outerMap = new HashMap<String, HashMap<String, String>>();
 	private HashMap<String, String> innerMap = new HashMap<String, String>();
 	private StreamCrypterAES fileCrypter = new StreamCrypterAES();
@@ -45,7 +43,7 @@ public class BotHandler {
 	public BotHandler(String password) throws IOException, ClassNotFoundException, InvalidKeyException,
 			NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 		this.fileName = "botHandler.ini";
-		this.secretKey = fileCrypter.getKey(password);
+		this.password = password;
 		File f = new File(this.fileName);
 		if (f.isFile() && f.canRead()) {
 			this.restoreMap();
@@ -68,9 +66,10 @@ public class BotHandler {
 	 * @throws NoSuchPaddingException
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeyException
+	 * @throws InvalidKeySpecException
 	 */
 	public void createBot(Properties botConfig, Properties mailConfig) throws ValidationException, IOException,
-			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 		this.validateConfigs(botConfig, mailConfig);
 		if (existsBot(botConfig.getProperty("botId"))) {
 			throw new IOException("Tried to Create Bot that already exists, Bot ID: " + botConfig.getProperty("botId"));
@@ -101,9 +100,10 @@ public class BotHandler {
 	 * @throws NoSuchPaddingException
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeyException
+	 * @throws InvalidKeySpecException
 	 */
 	public void changeBot(Properties botConfig, Properties mailConfig) throws ValidationException, IOException,
-			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 		this.validateConfigs(botConfig, mailConfig);
 		if (existsBot(botConfig.getProperty("botId"))) {
 			stopBot(botConfig.getProperty("botId"));
@@ -128,9 +128,10 @@ public class BotHandler {
 	 * @throws NoSuchPaddingException
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeyException
+	 * @throws InvalidKeySpecException
 	 */
-	public void deleteBot(String botId)
-			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+	public void deleteBot(String botId) throws IOException, InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, InvalidKeySpecException {
 		this.stopBot(botId);
 		outerMap.remove(botId);
 		System.out.println("Deleted Bot with ID: " + botId);
@@ -165,9 +166,10 @@ public class BotHandler {
 	 * @throws NoSuchPaddingException
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeyException
+	 * @throws InvalidKeySpecException
 	 */
 	public void startBot(String botId) throws ValidationException, IOException, InvalidKeyException,
-			NoSuchAlgorithmException, NoSuchPaddingException {
+			NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 		this.innerMap = this.outerMap.get(botId);
 		if (this.innerMap == null) {
 			System.out.println("InnerMap was null at startBot!");
@@ -203,7 +205,7 @@ public class BotHandler {
 		final String[] botConfigRegex = { botBotIdRegex, botNameRegex, botLinkRegex, botIntervalRegex };
 		final String[] mailConfigRegex = { mailPortRegex, mailHostRegex, mailSenderRecepientRegex,
 				mailSenderRecepientRegex };
-		
+
 		configValidator = new ConfigValidator(botRegexKeys, botConfigRegex);
 		configValidator.validateProperty(botConfig);
 		configValidator = new ConfigValidator(mailRegexKeys, mailConfigRegex);
@@ -217,12 +219,13 @@ public class BotHandler {
 	 * @throws NoSuchPaddingException
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeyException
+	 * @throws InvalidKeySpecException
 	 */
-	private void saveMap() throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
-		ObjectOutputStream outputStreamMap = new ObjectOutputStream(
-				fileCrypter.encryptFile(this.secretKey, this.fileName));
-		outputStreamMap.writeObject(this.outerMap);
-		outputStreamMap.close();
+	private void saveMap() throws IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+		ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+				fileCrypter.encryptFile(this.fileName, this.password));
+		objectOutputStream.writeObject(this.outerMap);
+		objectOutputStream.close();
 	}
 
 	/**
@@ -233,13 +236,13 @@ public class BotHandler {
 	 * @throws NoSuchPaddingException
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeyException
+	 * @throws InvalidKeySpecException
 	 */
 	@SuppressWarnings("unchecked")
-	private void restoreMap() throws IOException, ClassNotFoundException, InvalidKeyException, NoSuchAlgorithmException,
-			NoSuchPaddingException {
+	private void restoreMap() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidKeySpecException, IOException, ClassNotFoundException {
 		System.out.println("Restoring Map ....");
-		ObjectInputStream inputStreamMap = new ObjectInputStream(
-				fileCrypter.decryptFile(this.secretKey, this.fileName));
+		ObjectInputStream inputStreamMap = new ObjectInputStream(fileCrypter.decryptFile(this.fileName, this.password));
 		this.outerMap = (Map<String, HashMap<String, String>>) inputStreamMap.readObject();
 		inputStreamMap.close();
 	}
@@ -265,7 +268,7 @@ public class BotHandler {
 	 * @param threadId ThreadId of Thread to kill
 	 */
 	private void interruptThread(String threadId) {
-		Set<Thread> setOfThread = Thread.getAllStackTraces().keySet();
+		Set<Thread> setOfThread = new HashSet<Thread>(Thread.getAllStackTraces().keySet());
 		for (Thread thread : setOfThread) {
 			if (thread.getId() == Long.parseLong(threadId)) {
 				thread.interrupt();
@@ -331,9 +334,10 @@ public class BotHandler {
 	 * @throws NoSuchPaddingException
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeyException
+	 * @throws InvalidKeySpecException
 	 */
-	private void addThreadToMap(Properties botConfig, Properties mailConfig, String threadId)
-			throws IOException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException {
+	private void addThreadToMap(Properties botConfig, Properties mailConfig, String threadId) throws IOException,
+			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
 		this.innerMap = new HashMap<String, String>();
 		this.innerMap.putAll(convertToMap(botConfig));
 		this.innerMap.putAll(convertToMap(mailConfig));
