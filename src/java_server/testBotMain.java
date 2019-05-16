@@ -40,16 +40,15 @@ public class testBotMain {
 			String plainPassword = "GeheimesPasswort";
 			BotHandler botHandler = new BotHandler(plainPassword);
 			botHandler.createBot(botConfig, mailConfig);
-			Thread.sleep(3000);
-			botHandler.stopBot("111");
-			botHandler = new BotHandler(plainPassword);
-			Thread.sleep(2000);
-			botHandler.startBot("111");
-			botConfig.put("botId", "112");
-			botHandler.createBot(botConfig, mailConfig);
-			botConfig.put("botId", "113");
-			botHandler.createBot(botConfig, mailConfig);
-			System.out.println(botHandler.getConfigurations());
+			Thread.sleep(1000);
+//			botHandler.stopBot("111");
+//			botHandler = new BotHandler(plainPassword);
+//			Thread.sleep(2000);
+//			botHandler.startBot("111");
+//			botConfig.put("botId", "112");
+//			botHandler.createBot(botConfig, mailConfig);
+//			botConfig.put("botId", "113");
+//			botHandler.createBot(botConfig, mailConfig);
 		} catch (IOException | ClassNotFoundException | InvalidKeyException | NoSuchAlgorithmException
 				| NoSuchPaddingException | InvalidKeySpecException | ValidationException | InterruptedException e) {
 			System.out.println(e);
