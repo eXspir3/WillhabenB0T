@@ -20,7 +20,7 @@ public class testBotMain {
 				"https://www.willhaben.at/iad/kaufen-und-verkaufen/marktplatz?keyword=Xiaomi+m365&attribute_tree_level_0=&attribute_tree_level_1=&typedKeyword=Xiaomi+m365");
 		botConfig.put("name", "TestName");
 		botConfig.put("interval", "40");
-		botConfig.put("botId", "111");
+		botConfig.put("botId", "8");
 		mailConfig.put("startTLS", "true");
 		mailConfig.put("mailPort", "587");
 		mailConfig.put("mailHost", "");
@@ -38,19 +38,21 @@ public class testBotMain {
 		// plainPassword String for BotHandler encryption / decryption
 		try {
 			String plainPassword = "GeheimesPasswort";
-			BotHandler botHandler = new BotHandler(plainPassword);
+			BotHandler botHandler = new BotHandler(plainPassword, "Ensi");
+			botHandler.updateMap();
 			botHandler.createBot(botConfig, mailConfig);
 			Thread.sleep(1000);
-//			botHandler.stopBot("111");
-//			botHandler = new BotHandler(plainPassword);
+
+//			botHandler = new BotHandler(plainPassword, "Ensi");
 //			Thread.sleep(2000);
 //			botHandler.startBot("111");
 //			botConfig.put("botId", "112");
 //			botHandler.createBot(botConfig, mailConfig);
 //			botConfig.put("botId", "113");
 //			botHandler.createBot(botConfig, mailConfig);
+
 		} catch (IOException | ClassNotFoundException | InvalidKeyException | NoSuchAlgorithmException
-				| NoSuchPaddingException | InvalidKeySpecException | ValidationException | InterruptedException e) {
+				| NoSuchPaddingException | InvalidKeySpecException | InterruptedException | ValidationException e) {
 			System.out.println(e);
 		}
 	}

@@ -2,6 +2,7 @@ package java_server;
 
 import java.util.Properties;
 import java.util.Set;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,21 +18,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class BotHandler {
-	private final String mailSenderRecepientRegex = "(((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]"
-			+ "+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e"
-			+ "-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]"
-			+ "|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:"
-			+ "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
-			+ "(,\\s|$))+)";
-	private final String mailHostRegex = "^((\\*)|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]"
-			+ "|[01]?[0-9][0-9]?)|((\\*\\.)?([a-zA-Z0-9-]+\\.){0,5}[a-zA-Z0-9-][a-zA-Z0-9-]+\\.[a-zA-Z]{2,63}?))$";
-	private final String mailPortRegex = "^[0-9]{1,5}$";
-	private final String botIntervalRegex = "([4-8][0-9]|9[0-9]|[1-8][0-9]{2}|9[0-8][0-9]|99[0-9]"
-			+ "|[12][0-9]{3}|3[0-5][0-9]{2}|3600)";
-	private final String botLinkRegex = "(https?:\\/\\/(.+?\\.)?willhaben\\.at(\\/[A-Za-z0-9\\"
-			+ "-\\._~:\\/\\?#\\[\\]@!$&'\\(\\)\\*\\+,;\\=]*)?)";
-	private final String botBotIdRegex = "^[0-9]{1,3}$";
-	private final String botNameRegex = "^[a-zA-Z0-9]{1,32}$";
 
 	private String threadId;
 	private String fileName;
@@ -41,9 +27,9 @@ public class BotHandler {
 	private EncryptorAES fileEncrypter = new EncryptorAES();
 	private ConfigValidator configValidator = null;
 
-	public BotHandler(String password) throws IOException, ClassNotFoundException, InvalidKeyException,
+	public BotHandler(String password, String user) throws IOException, ClassNotFoundException, InvalidKeyException,
 			NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
-		this.fileName = "botHandler.ini";
+		this.fileName = user + "_config.ween";
 		this.password = password;
 		File f = new File(this.fileName);
 		if (f.isFile() && f.canRead()) {
@@ -136,7 +122,7 @@ public class BotHandler {
 		this.stopBot(botId);
 		outerMap.remove(botId);
 		System.out.println("Deleted Bot with ID: " + botId);
-		this.saveMap();
+		this.updateMap();
 	}
 
 	/**
@@ -203,9 +189,10 @@ public class BotHandler {
 	private void validateConfigs(Properties botConfig, Properties mailConfig) throws ValidationException {
 		final String[] botRegexKeys = { "botId", "name", "link", "interval" };
 		final String[] mailRegexKeys = { "mailPort", "mailHost", "mailSender", "mailRecepient" };
-		final String[] botConfigRegex = { botBotIdRegex, botNameRegex, botLinkRegex, botIntervalRegex };
-		final String[] mailConfigRegex = { mailPortRegex, mailHostRegex, mailSenderRecepientRegex,
-				mailSenderRecepientRegex };
+		final String[] botConfigRegex = { Regex.botBotIdRegex, Regex.botNameRegex, Regex.botLinkRegex,
+				Regex.botIntervalRegex };
+		final String[] mailConfigRegex = { Regex.mailPortRegex, Regex.mailHostRegex, Regex.mailSenderRecepientRegex,
+				Regex.mailSenderRecepientRegex };
 
 		configValidator = new ConfigValidator(botRegexKeys, botConfigRegex);
 		configValidator.validateProperty(botConfig);
@@ -243,9 +230,67 @@ public class BotHandler {
 	private void restoreMap() throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
 			InvalidKeySpecException, IOException, ClassNotFoundException {
 		System.out.println("Restoring Map ....");
-		ObjectInputStream inputStreamMap = new ObjectInputStream(fileEncrypter.decryptFile(this.fileName, this.password));
+		ObjectInputStream inputStreamMap = new ObjectInputStream(
+				fileEncrypter.decryptFile(this.fileName, this.password));
 		this.outerMap = (Map<String, HashMap<String, String>>) inputStreamMap.readObject();
 		inputStreamMap.close();
+	}
+	
+	/**
+	 * UpdateMap assures that the HashMap<Key: botID, Value: Bot/MailConfiguration> have a botId in ascending order (beginning with 1)
+	 * When a bot is removed via the delteBot() Function this Method is called an all botId´s are corrected 
+	 * 
+	 * Example: Keys of HashMap with 5 Bots: 				1,2,3,4,5
+	 * 			1. Bot with Key 3 is removed
+	 * 				--> the keys are not in order:			1,2,4,5
+	 * 
+	 * 			2. updateMap is called and order corrected	1,2,3,4
+	 * 
+	 * This is mandatory as the gui client labels bots in ascending order and closes holes
+	 * 
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeySpecException
+	 * @throws IOException
+	 */
+	public void updateMap() throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, IOException {
+		int keys[] = new int[this.outerMap.size()];
+		int i = 0;
+		for (Map.Entry<String, HashMap<String, String>> entry : this.outerMap.entrySet()) {
+			keys[i] = Integer.parseInt(entry.getKey());
+			i++;
+		}
+		Arrays.sort(keys);
+		for (i = 0; i < keys.length; i++) {
+			if (keys[i] != i) {
+				this.outerMap.put(String.valueOf(i), this.outerMap.get(String.valueOf(keys[i])));
+				this.outerMap.remove(String.valueOf(keys[i]));
+			}
+		}
+		this.saveMap();
+	}
+
+	/**
+	 * Adds the Bot Configurations and threadId to map, then adds this generated map
+	 * to outerMap which is access by the key *botId*
+	 * 
+	 * @param botConfig  botConfig Property
+	 * @param mailConfig botConfig Property
+	 * @param threadId   ID of Thread this Bot is running in
+	 * @throws IOException
+	 * @throws NoSuchPaddingException
+	 * @throws NoSuchAlgorithmException
+	 * @throws InvalidKeyException
+	 * @throws InvalidKeySpecException
+	 */
+	private void addThreadToMap(Properties botConfig, Properties mailConfig, String threadId) throws IOException,
+			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
+		this.innerMap = new HashMap<String, String>();
+		this.innerMap.putAll(convertToMap(botConfig));
+		this.innerMap.putAll(convertToMap(mailConfig));
+		this.innerMap.put("threadId", threadId);
+		this.outerMap.put(botConfig.getProperty("botId"), this.innerMap);
+		this.saveMap();
 	}
 
 	/**
@@ -322,28 +367,5 @@ public class BotHandler {
 			mailConfig.put(mailConfigItems[i], map.get(mailConfigItems[i]));
 		}
 		return mailConfig;
-	}
-
-	/**
-	 * Adds the Bot Configurations and threadId to map, then adds this generated map
-	 * to outerMap which is access by the key *botId*
-	 * 
-	 * @param botConfig  botConfig Property
-	 * @param mailConfig botConfig Property
-	 * @param threadId   ID of Thread this Bot is running in
-	 * @throws IOException
-	 * @throws NoSuchPaddingException
-	 * @throws NoSuchAlgorithmException
-	 * @throws InvalidKeyException
-	 * @throws InvalidKeySpecException
-	 */
-	private void addThreadToMap(Properties botConfig, Properties mailConfig, String threadId) throws IOException,
-			InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException {
-		this.innerMap = new HashMap<String, String>();
-		this.innerMap.putAll(convertToMap(botConfig));
-		this.innerMap.putAll(convertToMap(mailConfig));
-		this.innerMap.put("threadId", threadId);
-		this.outerMap.put(botConfig.getProperty("botId"), this.innerMap);
-		this.saveMap();
 	}
 }
