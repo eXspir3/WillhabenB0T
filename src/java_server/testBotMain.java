@@ -33,7 +33,10 @@ public class testBotMain {
 		// funktionieren!!!!
 		try {
 			UserAuthentication userAuth = new UserAuthentication();
-			userAuth.login("admin", "asdasdasd");
+			userAuth.login("Admin", "defaultwillhaben");
+			//userAuth.addUser("testUser1", "IchBinEinPasswort!");
+			//userAuth.login("testUser1", "IchBinEinPasswort!");
+			userAuth.addUser("testUser1", "tadapassword!");
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException
 				| ClassNotFoundException | AuthenticationException | IOException | ValidationException e) {
 			// TODO Auto-generated catch block

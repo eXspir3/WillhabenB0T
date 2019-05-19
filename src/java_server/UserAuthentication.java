@@ -138,6 +138,49 @@ public class UserAuthentication {
 	}
 
 	/**
+	 * Function to change password of a user , allowes "admin" role users to change
+	 * everyones password, and normal users to change their own password
+	 * 
+	 * @param user        User to change the password of
+	 * @param oldPassword old Userpassword
+	 * @param newPassword new Userpassword
+	 * @throws AuthenticationException
+	 * @throws InvalidKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 * @throws InvalidKeySpecException
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 * @throws ValidationException
+	 */
+	public void changePassword(String user, String oldPassword, String newPassword)
+			throws AuthenticationException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
+			InvalidKeySpecException, ClassNotFoundException, IOException, ValidationException {
+
+		this.validateUserPassword(user, newPassword);
+		if (this.loggedIn && hasRole("admin")) {
+			if (!this.existsUser(user)) {
+				throw new AuthenticationException("User " + user + "does not exist!", 3);
+			}
+			this.loadUserConfig();
+			this.userConfig.get(user).put("password", newPassword);
+			this.saveUserConfig();
+		} else if (this.loggedIn && this.loggedInUser.equals(user)) {
+			this.login(user, oldPassword);
+			if (!this.existsUser(user)) {
+				throw new AuthenticationException("User " + user + "does not exist!", 3);
+			}
+			this.loadUserConfig();
+			this.userConfig.get(user).put("password", newPassword);
+			this.saveUserConfig();
+		} else {
+			this.unloadUserConfig();
+			throw new AuthenticationException("User does not have Permission to change password of " + user, 3);
+		}
+
+	}
+
+	/**
 	 * This Method Validates User and Password String input
 	 * 
 	 * @param user
