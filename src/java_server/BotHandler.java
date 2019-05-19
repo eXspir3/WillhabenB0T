@@ -24,7 +24,7 @@ public class BotHandler {
 	private String password;
 	private Map<String, HashMap<String, String>> outerMap = new HashMap<String, HashMap<String, String>>();
 	private HashMap<String, String> innerMap = new HashMap<String, String>();
-	private EncryptorAES fileEncrypter = new EncryptorAES();
+	private EncryptorAES fileEncryptor = new EncryptorAES();
 	private ConfigValidator configValidator = null;
 
 	public BotHandler(String password, String user) throws IOException, ClassNotFoundException, InvalidKeyException,
@@ -211,7 +211,7 @@ public class BotHandler {
 	 */
 	private void saveMap() throws IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		ObjectOutputStream objectOutputStream = new ObjectOutputStream(
-				fileEncrypter.encryptFile(this.fileName, this.password));
+				fileEncryptor.encryptFile(this.fileName, this.password));
 		objectOutputStream.writeObject(this.outerMap);
 		objectOutputStream.close();
 	}
@@ -231,7 +231,7 @@ public class BotHandler {
 			InvalidKeySpecException, IOException, ClassNotFoundException {
 		System.out.println("Restoring Map ....");
 		ObjectInputStream inputStreamMap = new ObjectInputStream(
-				fileEncrypter.decryptFile(this.fileName, this.password));
+				fileEncryptor.decryptFile(this.fileName, this.password));
 		this.outerMap = (Map<String, HashMap<String, String>>) inputStreamMap.readObject();
 		inputStreamMap.close();
 	}

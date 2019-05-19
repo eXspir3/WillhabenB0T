@@ -18,6 +18,26 @@ class ConfigValidator {
 		this.keyToRegex = convertToMap(configKeys, regex);
 	}
 
+	ConfigValidator() {
+	}
+
+	/**
+	 * Validate a String with a RegularExpressions Pattern
+	 * 
+	 * @param string       String to validate
+	 * @param regexPattern Regular Expressions Pattern to use for validation
+	 * @throws ValidationException
+	 */
+	void validateString(String string, String regexPattern) throws ValidationException {
+		Pattern pattern = Pattern.compile(regexPattern);
+		Matcher matString = pattern.matcher(string);
+		boolean check = matString.find();
+		if (!check || !matString.group(0).equals(string)) {
+			throw new ValidationException(
+					"Validation unsuccessful for String: \"" + string + "\" in Pattern: " + regexPattern, 1);
+		}
+	}
+
 	/**
 	 * Validates certain values in a property by using a regexmap which is mapping
 	 * keys of property to the regular Expression the value of this key should be

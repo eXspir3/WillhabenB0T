@@ -22,6 +22,10 @@ public class Regex {
 	
 	public static final String botBotIdRegex = 				"^[0-9]{1,3}$";
 	
-	public static final String botNameRegex = 				"^[a-zA-Z0-9]{1,32}$";
+	public static final String botNameRegex = 				"^[a-zA-Z0-9_-]{1,32}$";
+	
+	public static final String userNameRegex = 				"^[a-zA-Z0-9_-]{5,20}$";
+	
+	public static final String passwordRegex =				"^[a-zA-Z0-9_\\-!@#\\$%\\^&]{8,20}$"; ;
 
 }
