@@ -43,8 +43,10 @@ class WillhabenBot implements Runnable {
 			}
 		} catch (Exception e) {
 			Thread.currentThread().interrupt();
-			System.out.println("Thread Exit");
-		}
+			System.out.println("Thread Exit by Exception");
+		} 
+		Thread.currentThread().interrupt();
+		System.out.println("Thread Exit");
 	}
 
 	/**

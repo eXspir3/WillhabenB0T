@@ -36,7 +36,7 @@ public class testBotMain {
 			userAuth.login("Admin", "defaultwillhaben");
 			//userAuth.addUser("testUser1", "IchBinEinPasswort!");
 			//userAuth.login("testUser1", "IchBinEinPasswort!");
-			userAuth.addUser("testUser1", "tadapassword!");
+			userAuth.removeUser("testUser1");
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeySpecException
 				| ClassNotFoundException | AuthenticationException | IOException | ValidationException e) {
 			// TODO Auto-generated catch block
