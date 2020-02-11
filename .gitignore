@@ -1,3 +1,2 @@
-/bin/
-/.idea/
-/src/main/java/java_server/testBotMain.java
+bin/
+src/main/java/java_server/testBotMain.java
