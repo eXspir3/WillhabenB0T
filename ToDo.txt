@@ -1,5 +1,0 @@
-1. Connection Client <--> Server
-2. Login Client --> Server
-3. Throwing Exceptions if Server Config Wrong or not configured (and catching + sending to GUI with Error Codes)
-4. Server Log
-5. Android App (Standalone Push) 
