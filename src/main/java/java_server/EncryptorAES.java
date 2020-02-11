@@ -27,8 +27,6 @@ public class EncryptorAES {
 	
 	/**
 	 * Used to decrypt the handlerConfig.ini File with the given password
-	 * 
-	 * @param decryptKey
 	 * @return
 	 * @throws NoSuchAlgorithmException
 	 * @throws NoSuchPaddingException
@@ -48,8 +46,7 @@ public class EncryptorAES {
 
 	/**
 	 * Used to encrypt the handlerConfig.ini File with the given AES Key
-	 * 
-	 * @param encryptKey
+	 *
 	 * @return
 	 * @throws InvalidKeyException
 	 * @throws NoSuchAlgorithmException

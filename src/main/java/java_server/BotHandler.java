@@ -234,6 +234,7 @@ public class BotHandler {
 				fileEncryptor.decryptFile(this.fileName, this.password));
 		this.outerMap = (Map<String, HashMap<String, String>>) inputStreamMap.readObject();
 		inputStreamMap.close();
+		System.out.println(this.outerMap.toString());
 	}
 	
 	/**
@@ -303,6 +304,7 @@ public class BotHandler {
 		if (this.outerMap.isEmpty() || this.outerMap == null || this.outerMap.toString().equals("{}")) {
 			return false;
 		}
+		System.out.println(this.outerMap.toString());
 		return this.outerMap.containsKey(botId);
 	}
 
