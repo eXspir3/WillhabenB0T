@@ -145,7 +145,7 @@ public class BotHandler {
      * Validate botConfig and mailConfig - e.g. only valid Email-Formats allowed in
      * mailSender
      *
-     * @param botConfig Property of with Settings for Bot
+     * @param botConfig  Property of with Settings for Bot
      * @param mailConfig Property with settings for smtp
      */
     private void validateConfigs(Properties botConfig, Properties mailConfig) throws ValidationException {
@@ -270,9 +270,9 @@ public class BotHandler {
      * @param props Properties that are converted to HashMap
      * @return Converted HashMap
      */
-	@SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private Map<String, String> convertToMap(Properties props) {
-		return (Map<String, String>) new HashMap(props);
+        return (Map<String, String>) new HashMap(props);
     }
 
     /**
@@ -285,9 +285,9 @@ public class BotHandler {
     private Properties convertToBotConfig(Map<?, ?> map) {
         String[] botConfigItems = {"link", "name", "botId", "interval"};
         Properties botConfig = new Properties();
-		for (String botConfigItem : botConfigItems) {
-			botConfig.put(botConfigItem, map.get(botConfigItem));
-		}
+        for (String botConfigItem : botConfigItems) {
+            botConfig.put(botConfigItem, map.get(botConfigItem));
+        }
         return botConfig;
     }
 
@@ -302,9 +302,9 @@ public class BotHandler {
         String[] mailConfigItems = {"startTLS", "user", "password", "mailSender", "mailRecepient", "mailHost",
                 "mailPort", "link"};
         Properties mailConfig = new Properties();
-		for (String mailConfigItem : mailConfigItems) {
-			mailConfig.put(mailConfigItem, map.get(mailConfigItem));
-		}
+        for (String mailConfigItem : mailConfigItems) {
+            mailConfig.put(mailConfigItem, map.get(mailConfigItem));
+        }
         return mailConfig;
     }
 }
