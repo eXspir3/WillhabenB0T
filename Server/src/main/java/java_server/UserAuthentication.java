@@ -15,7 +15,7 @@ public class UserAuthentication {
 
     private Map<String, HashMap<String, String>> userConfig = new HashMap<String, HashMap<String, String>>();
     private HashMap<String, String> innerConfig = new HashMap<String, String>();
-    private EncryptorAES fileEncryptor = null;
+    private AESCrypter fileEncryptor = null;
     private String key = null;
     private boolean loggedIn = false;
     private String loggedInUser = "";
@@ -23,7 +23,7 @@ public class UserAuthentication {
     public UserAuthentication() throws AuthenticationException, InvalidKeyException, NoSuchAlgorithmException,
             NoSuchPaddingException, InvalidKeySpecException, ClassNotFoundException, IOException {
         this.key = "XvQ5IrJww7n9kC0S";
-        this.fileEncryptor = new EncryptorAES();
+        this.fileEncryptor = new AESCrypter();
 
     }
 
