@@ -3,26 +3,23 @@ package java_server;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class WillhabenBot implements Runnable {
 
-    private String link = null;
-    private int interval = -1;
-    private int noListings = 0;
-    @SuppressWarnings("unused")
-    private String botId;
-    @SuppressWarnings("unused")
-    private String name;
+    private String link;
+    private int interval;
+    private int noListings;
     private Properties mailConfiguration;
     private Properties botConfig;
 
     public WillhabenBot(Properties botConfig, Properties mailConfiguration) {
         this.botConfig = botConfig;
-        this.botId = botConfig.getProperty("botId");
-        this.name = botConfig.getProperty("name");
+        String botId = botConfig.getProperty("botId");
+        String name = botConfig.getProperty("name");
         this.link = botConfig.getProperty("link");
         this.interval = Integer.parseInt(botConfig.getProperty("interval"));
         this.mailConfiguration = mailConfiguration;
@@ -55,7 +52,7 @@ class WillhabenBot implements Runnable {
      * @return The Number of Listings extracted by extractNumberOfListings()
      */
     private String prepareLink() {
-        if (this.link != "" && this.link != null) {
+        if (this.link != null && !Objects.equals(this.link, "")) {
             return this.link;
         } else {
             System.out.println("No Link / Keywords provided");
@@ -67,12 +64,12 @@ class WillhabenBot implements Runnable {
      * Extracts the Number of Listings from a given Willhaben Link by Parsing it
      * through HTML Parser JSoup and Regular Expressions.
      *
-     * @param link
+     * @param link The current link searched by WillhabenBot
      * @return The Number of Listings extractet from Site Sourcecode.
      */
     private int extractNumberOfListings(String link) {
         try {
-            if (link == null || link == "")
+            if (link == null || Objects.equals(link, ""))
                 throw new Exception("Link Null");
             org.jsoup.nodes.Document website = Jsoup.connect(link).get();
             Elements strippedHtml = website.select("script");
@@ -102,8 +99,6 @@ class WillhabenBot implements Runnable {
     /**
      * Checks if there are new Listings available and sets this.noListings according
      * to the changes and calls sendMail if there is a new Listing.
-     *
-     * @throws Exception
      */
     private void isNew() throws Exception {
 
@@ -127,19 +122,17 @@ class WillhabenBot implements Runnable {
      * Creates Mail Object, Configures and Sends Email and then calls startTimer to
      * wait
      *
-     * @throws Exception
      */
-    private void sendMail() throws Exception {
+    private void sendMail() {
         new SendMail(this.mailConfiguration, this.botConfig.getProperty("link"));
     }
 
     /**
      * Puts Thread to sleep for given amount of Time
      *
-     * @param interval
-     * @throws Exception
+     * @param interval Intervall in seconds between Willhaben Searches
      */
-    private void startTimer(int interval) throws Exception {
+    private void startTimer(int interval) throws InterruptedException {
         System.out.println("Timer Started: " + interval + " seconds");
         Thread.sleep(interval * 1000);
     }

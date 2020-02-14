@@ -13,15 +13,14 @@ import java.util.Map;
 
 public class UserAuthentication {
 
-    private Map<String, HashMap<String, String>> userConfig = new HashMap<String, HashMap<String, String>>();
-    private HashMap<String, String> innerConfig = new HashMap<String, String>();
-    private AESCrypter fileEncryptor = null;
-    private String key = null;
+    private Map<String, HashMap<String, String>> userConfig = new HashMap<>();
+    private HashMap<String, String> innerConfig = new HashMap<>();
+    private AESCrypter fileEncryptor;
+    private String key;
     private boolean loggedIn = false;
     private String loggedInUser = "";
 
-    public UserAuthentication() throws AuthenticationException, InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidKeySpecException, ClassNotFoundException, IOException {
+    public UserAuthentication() throws NoSuchAlgorithmException, NoSuchPaddingException {
         this.key = "XvQ5IrJww7n9kC0S";
         this.fileEncryptor = new AESCrypter();
 
@@ -36,29 +35,21 @@ public class UserAuthentication {
      * userConfig.get(user).get("role") - the user does not Exist and a
      * AuthenticationException is thrown
      * <p>
-     * The If Else Block checks for password validity
+     * The If Else Block checks for passwordHash validity
      *
-     * @param user     Username
-     * @param password this Users Password
-     * @throws AuthenticationException
-     * @throws InvalidKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
-     * @throws InvalidKeySpecException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws ValidationException
+     * @param user         Username
+     * @param passwordHash this Users Password
      */
-    public void login(String user, String password)
-            throws AuthenticationException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeySpecException, ClassNotFoundException, IOException, ValidationException {
-        this.validateUserPassword(user, password);
+    public void login(String user, String passwordHash)
+            throws AuthenticationException, InvalidKeyException, NoSuchAlgorithmException,
+            InvalidKeySpecException, ClassNotFoundException, IOException {
+        this.validateUser(user);
         this.logout();
         if (!this.existsUser(user)) {
             throw new AuthenticationException("Invalid Username or Password on Authentication", 2);
         }
         this.loadUserConfig();
-        if (password.equals(userConfig.get(user).get("password"))) {
+        if (passwordHash.equals(userConfig.get(user).get("passwordHash"))) {
             this.loggedIn = true;
             this.loggedInUser = user;
             this.unloadUserConfig();
@@ -73,28 +64,20 @@ public class UserAuthentication {
      * Function to add Users --> Only Users with Role "admin" can create new Users
      *
      * @param user     new Username
-     * @param password new Password
-     * @throws AuthenticationException
-     * @throws InvalidKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeySpecException
-     * @throws IOException
-     * @throws NoSuchPaddingException
-     * @throws ClassNotFoundException
-     * @throws ValidationException
+     * @param passwordHash new Password as Hash
      */
-    public void addUser(String user, String password)
+    public void addUser(String user, String passwordHash)
             throws AuthenticationException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException,
-            IOException, NoSuchPaddingException, ClassNotFoundException, ValidationException {
+            IOException, NoSuchPaddingException, ClassNotFoundException {
 
-        this.validateUserPassword(user, password);
+        this.validateUser(user);
         if (this.loggedIn && hasRole("admin")) {
             if (this.existsUser(user)) {
                 throw new AuthenticationException("The User " + user + "already exists!", 3);
             }
             this.loadUserConfig();
-            this.innerConfig = new HashMap<String, String>();
-            this.innerConfig.put("password", password);
+            this.innerConfig = new HashMap<>();
+            this.innerConfig.put("passwordHash", passwordHash);
             this.innerConfig.put("role", "user");
             this.userConfig.put(user, this.innerConfig);
             this.saveUserConfig();
@@ -109,18 +92,10 @@ public class UserAuthentication {
      * Function to remove Users --> Only Users with Role "admin" can remove Users
      *
      * @param user User to Remove
-     * @throws InvalidKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
-     * @throws InvalidKeySpecException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws AuthenticationException
-     * @throws ValidationException
      */
     public void removeUser(String user) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeySpecException, ClassNotFoundException, IOException, AuthenticationException, ValidationException {
-        this.validateUserPassword(user, "nopassword");
+            InvalidKeySpecException, ClassNotFoundException, IOException, AuthenticationException {
+        this.validateUser(user);
         if (this.loggedIn && hasRole("admin") && !user.equals("admin")) {
             if (!this.existsUser(user)) {
                 throw new AuthenticationException("User " + user + "does not exist!", 3);
@@ -141,36 +116,28 @@ public class UserAuthentication {
      * everyones password, and normal users to change their own password
      *
      * @param user        User to change the password of
-     * @param oldPassword old Userpassword
-     * @param newPassword new Userpassword
-     * @throws AuthenticationException
-     * @throws InvalidKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
-     * @throws InvalidKeySpecException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws ValidationException
+     * @param oldPasswordHash old Userpassword
+     * @param newPasswordHash new Userpassword
      */
-    public void changePassword(String user, String oldPassword, String newPassword)
+    public void changePassword(String user, String oldPasswordHash, String newPasswordHash)
             throws AuthenticationException, InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
-            InvalidKeySpecException, ClassNotFoundException, IOException, ValidationException {
+            InvalidKeySpecException, ClassNotFoundException, IOException {
 
-        this.validateUserPassword(user, newPassword);
+        this.validateUser(user);
         if (this.loggedIn && hasRole("admin")) {
             if (!this.existsUser(user)) {
                 throw new AuthenticationException("User " + user + "does not exist!", 3);
             }
             this.loadUserConfig();
-            this.userConfig.get(user).put("password", newPassword);
+            this.userConfig.get(user).put("password", newPasswordHash);
             this.saveUserConfig();
         } else if (this.loggedIn && this.loggedInUser.equals(user)) {
-            this.login(user, oldPassword);
+            this.login(user, oldPasswordHash);
             if (!this.existsUser(user)) {
                 throw new AuthenticationException("User " + user + "does not exist!", 3);
             }
             this.loadUserConfig();
-            this.userConfig.get(user).put("password", newPassword);
+            this.userConfig.get(user).put("password", newPasswordHash);
             this.saveUserConfig();
         } else {
             this.unloadUserConfig();
@@ -180,17 +147,14 @@ public class UserAuthentication {
     }
 
     /**
-     * This Method Validates User and Password String input
+     * This Method Validates User String input
      *
-     * @param user
-     * @param password
-     * @throws ValidationException
-     * @throws AuthenticationException
+     * @param user User for Login
      */
-    private void validateUserPassword(String user, String password) throws AuthenticationException {
+    private void validateUser(String user) throws AuthenticationException {
         ConfigValidator validator = new ConfigValidator();
-        if (user == null || user.isEmpty() || password == null || password.isEmpty()) {
-            throw new AuthenticationException("Username or Password was empty or null!", 1);
+        if (user == null || user.isEmpty()) {
+            throw new AuthenticationException("Username was empty or null!", 1);
         }
         try {
             validator.validateString(user, Regex.userNameRegex);
@@ -198,29 +162,22 @@ public class UserAuthentication {
             throw new AuthenticationException(
                     "Username did not meet requirements 5-20 Allowed Charakters: 'a-z A-Z 0-9 _-' ", 1);
         }
-        try {
-            validator.validateString(password, Regex.passwordRegex);
-        } catch (ValidationException e) {
-            throw new AuthenticationException(
-                    "Password did not meet requirements 8-20 Allowed Charakters: 'a-z A-Z 0-9 _- !@#\\$%\\^&' ", 1);
-        }
+//        try {
+//            validator.validateString(password, Regex.passwordRegex);
+//        } catch (ValidationException e) {
+//            throw new AuthenticationException(
+//                    "Password did not meet requirements 8-20 Allowed Charakters: 'a-z A-Z 0-9 _- !@#\\$%\\^&' ", 1);
+//        }
     }
 
     /**
      * Checks if a user exists by trying to access its role parameters in Map
      *
      * @param user User of which existance is checked
-     * @return
-     * @throws InvalidKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
-     * @throws InvalidKeySpecException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws AuthenticationException
+     * @return true if user exists, false otherwise
      */
     private boolean existsUser(String user)
-            throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException,
+            throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException,
             ClassNotFoundException, IOException, AuthenticationException {
         this.loadUserConfig();
         try {
@@ -238,18 +195,11 @@ public class UserAuthentication {
      *
      * @param role The Role to check
      * @return TRUE if the loggedInUser has the role, false if otherwise
-     * @throws InvalidKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
-     * @throws InvalidKeySpecException
-     * @throws ClassNotFoundException
-     * @throws IOException
-     * @throws AuthenticationException
      */
     private boolean hasRole(String role) throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException,
             InvalidKeySpecException, ClassNotFoundException, IOException, AuthenticationException {
         this.loadUserConfig();
-        if (this.loggedIn == true && userConfig.get(this.loggedInUser).get("role").equals(role)) {
+        if (this.loggedIn && userConfig.get(this.loggedInUser).get("role").equals(role)) {
             System.out.println("User: " + this.loggedInUser + " has Role: " + role);
             this.unloadUserConfig();
             return true;
@@ -268,18 +218,10 @@ public class UserAuthentication {
 
     /**
      * Method Loads UserConfig decrypted from File into HashMap
-     *
-     * @throws IOException
-     * @throws InvalidKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws NoSuchPaddingException
-     * @throws InvalidKeySpecException
-     * @throws ClassNotFoundException
-     * @throws AuthenticationException
      */
     @SuppressWarnings("unchecked")
     private void loadUserConfig() throws IOException, InvalidKeyException, NoSuchAlgorithmException,
-            NoSuchPaddingException, InvalidKeySpecException, ClassNotFoundException, AuthenticationException {
+            InvalidKeySpecException, ClassNotFoundException, AuthenticationException {
         File f = new File("auth.ween");
         if (f.isFile() && f.canRead()) {
             System.out.println("Loading Userconfig.....");
@@ -305,11 +247,6 @@ public class UserAuthentication {
 
     /**
      * Function used to save UserConfig from Map to encrypted File
-     *
-     * @throws IOException
-     * @throws InvalidKeyException
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeySpecException
      */
     private void saveUserConfig()
             throws IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
