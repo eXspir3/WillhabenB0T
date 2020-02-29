@@ -14,6 +14,7 @@ public class WebServer {
 
             server.setExecutor(threadPoolExecutor);
             server.createContext("/bot", new BotRequestHandler());
+            server.createContext("/user", new UserRequestHandler());
 
             server.start();
 

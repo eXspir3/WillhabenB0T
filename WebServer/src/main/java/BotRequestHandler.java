@@ -9,28 +9,33 @@ public class BotRequestHandler implements com.sun.net.httpserver.HttpHandler {
 
     /**
      * Handles requests - currently
-     * @param httpExchange ?? dont know wher this comes from
+     *
+     * @param httpExchange ?? don't know where this comes from
      * @throws IOException if something fails during output.
      */
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
 
-        String requestParamValue = null;
-        if("GET".equals(httpExchange.getRequestMethod())) {
+        String requestParamValue;
+
+        // if a wrong type is used, then a 405 error should be sent.
+
+        if ("GET".equals(httpExchange.getRequestMethod())) {
             requestParamValue = handleGetRequest(httpExchange);
         } else { // Post method used!!!
 
-            //requestParamValue = handlePostRequest(httpExchange); --> Handle Post not recognized
+            requestParamValue = handlePostRequest(httpExchange);
 
         }
 
-        handleResponse(httpExchange,requestParamValue);
+        handleResponse(httpExchange, requestParamValue);
 
     }
 
     /**
      * Transforms 'httpExchaange' into the requested URL String
+     *
      * @param httpExchange Input Object
      * @return requested page URL String
      */
@@ -42,13 +47,18 @@ public class BotRequestHandler implements com.sun.net.httpserver.HttpHandler {
                 .split(Regex.FIRST_QUESTION_MARK)[1];
     }
 
+    private String handlePostRequest(HttpExchange httpExchange) {
+        return httpExchange.getRequestHeaders().getFirst("POST"); //Only for testing it wont work!
+    }
+
+
     /**
-     *
      * @param httpExchange
      * @param requestParamValue URL of the requested action
      * @throws IOException
      */
-    private void handleResponse(HttpExchange httpExchange, String requestParamValue)  throws  IOException {
+
+    private void handleResponse(HttpExchange httpExchange, String requestParamValue) throws IOException {
 
         Matcher matcher = Regex.getPattern(Regex.VALID_PARAM).matcher(requestParamValue);
 
@@ -64,20 +74,159 @@ public class BotRequestHandler implements com.sun.net.httpserver.HttpHandler {
         OutputStream outputStream = httpExchange.getResponseBody();
 
         String htmlResponse;
+
+        boolean success = false;
+
         // encode HTML content
         switch (urlAction) {
             case "add":
-                htmlResponse = "<html>" +
-                        "<body>" +
-                        "<h1>" +
-                        "Create new bot " +
-                        urlActionParam +
-                        "</h1>" +
-                        "</body>" +
-                        "</html>"
-                // encode HTML content
-                ;
+
+
+
+                if (success) {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Created new bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                } else {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Failed to create new bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                }
+
                 break;
+
+            case "delete":
+
+
+
+                if (success) {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Delete bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                } else {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Failed to delete bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                }
+
+                break;
+
+
+            case "edit":
+
+                if (success) {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Edit new bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                } else {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Failed to edit new bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                }
+
+                break;
+
+
+            case "start":
+
+                if (success) {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Start new bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                } else {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Failed to start new bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                }
+
+                break;
+
+
+            case "stop":
+
+                if (success) {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Stop bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                } else {
+                    htmlResponse = "<html>" +
+                            "<body>" +
+                            "<h1>" +
+                            "Failed to stop bot " +
+                            urlActionParam +
+                            "</h1>" +
+                            "</body>" +
+                            "</html>"
+                    // encode HTML content
+                    ;
+                }
+
+                break;
+
+
             default:
                 htmlResponse = "<html>" +
                         "<body>" +
@@ -86,19 +235,12 @@ public class BotRequestHandler implements com.sun.net.httpserver.HttpHandler {
                         "</h1>" +
                         "</body>" +
                         "</html>";
-
         }
-
 
         // this line is a must
         httpExchange.sendResponseHeaders(200, htmlResponse.length());
-
         outputStream.write(htmlResponse.getBytes());
         outputStream.flush();
         outputStream.close();
-
-
     }
-
-
 }
